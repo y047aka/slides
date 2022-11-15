@@ -25,24 +25,27 @@
     }
 
     h1 {
-      margin-bottom: 5rem;
-      font-size: 6.5rem;
+      margin-bottom: 6.5rem;
+      font-size: 6rem;
       line-height: 1.4;
     }
 
-    ol {
-      padding-left: 7rem;
+    a {
+      color: inherit;
     }
 
     li {
       margin: 1em 0;
     }
   </style>
-  <script src="assets/elm.js"></script>
+  <script src="./assets/elm-mapbox/dist/elm-mapbox.umd.js"></script>
 </head>
 
 <body>
-  <script>Elm.Main.init();</script>
+  <script src="/build/2019-08-25_we-are-never-ever-getting-back-together.js"></script>
+  <script>elmMapbox.registerCustomElement()</script>
+  <script src="/build/app.js"></script>
+  <script>elmMapbox.registerPorts(app)</script>
 </body>
 
 </html>

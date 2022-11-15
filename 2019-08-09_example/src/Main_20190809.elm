@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Main_20190809 exposing (main)
 
 import SliceShow exposing (..)
 import Slides exposing (slides, subscriptions, update, view)

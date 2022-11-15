@@ -1,0 +1,22 @@
+{
+    "targets": {
+        "2019-08-09_example": {
+            "inputs": [
+                "2019-08-09_example/src/Main_20190809.elm"
+            ],
+            "output": "public/build/2019-08-09_example.js"
+        },
+        "2019-08-12_elm-starfighter": {
+            "inputs": [
+                "2019-08-12_elm-starfighter/src/Main_20190812.elm"
+            ],
+            "output": "public/build/2019-08-12_elm-starfighter.js"
+        },
+        "2019-08-25_we-are-never-ever-getting-back-together": {
+            "inputs": [
+                "2019-08-25_we-are-never-ever-getting-back-together/src/Main_20190825.elm"
+            ],
+            "output": "public/build/2019-08-25_we-are-never-ever-getting-back-together.js"
+        }
+    }
+}

@@ -3,3 +3,5 @@ node_modules
 
 # Elm Dependency directory
 elm-stuff
+
+build

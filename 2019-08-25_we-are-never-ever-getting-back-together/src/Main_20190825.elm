@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Main_20190825 exposing (main)
 
 import Custom exposing (Content, Msg)
 import Formatting exposing (background, bullet, bulletLink, bullets, code, colored, group, noPointerEvents, position, spacer, text_, title)
