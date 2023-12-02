@@ -22,9 +22,11 @@ background url =
         (Html.div
             [ style "height" "100%"
             , style "box-sizing" "border-box"
+            , style "padding" "10px 100px 20px"
             , style "background-image" ("url(" ++ url ++ ")")
             , style "background-size" "cover"
-            , style "padding" "50px 100px"
+            , style "color" "#FFF"
+            , style "text-shadow" "0 0 50px #000"
             ]
         )
 

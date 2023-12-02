@@ -1,9 +1,9 @@
 module Main_20231202 exposing (main)
 
 import Custom exposing (Content, Msg)
-import Formatting exposing (bulletLink, bullets, code, colored, padded, spacer, text_, title, bullet)
-import Html exposing (a, br, h1, li, span, text)
-import Html.Attributes exposing (href, style, target)
+import Formatting exposing (background, bulletLink, bullets, code, padded, spacer, text_, title, bullet)
+import Html exposing (a, br, h1, li, span, text, img)
+import Html.Attributes exposing (href, style, target, src)
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
 import SliceShow.Content exposing (item)
 import SliceShow.Slide exposing (setDimensions, slide)
@@ -34,18 +34,36 @@ slides =
 
 cover : List Content
 cover =
-    [ colored
-        "hsl(40, 100%, 40%)"
-        "#FFF"
+    [ background "assets/images/cover_20231202.jpg"
         [ item
-            (h1 []
-                [ span [ style "font-size" "5rem" ] [ text "配色のデザイントークンを賢く管理したい！" ]
+            (h1 [ style "font-size" "7rem" ]
+                [ span [ style "margin" "0",  style "font-size" "5rem" ] [ text "配色のデザイントークンを賢く管理したい！" ]
                 , br [] []
                 , span [ style "font-size" "14rem" ] [ text "elm-css-palette" ]
                 ]
             )
-        , spacer 120
-        , text_ "Yoshitaka Totsuka"
+        , spacer 50
+        , item
+            (img
+                [ src "assets/images/y047aka.png"
+                , style "width" "90px"
+                , style "border-radius" "50%"
+                ]
+                []
+            )
+        , item
+            (span
+                [ style "position" "relative"
+                , style "top" "-2.5rem"
+                , style "padding-left" "0.5em"
+                , style "font-size" "4.5rem"
+                ]
+                [ text "Yoshitaka Totsuka" ]
+            )
+        , spacer 20
+        , text_ "Elm-jp 2023：川崎"
+        , spacer 10
+        , text_ "2023.12.02"
         ]
     ]
 
