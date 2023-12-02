@@ -1,9 +1,9 @@
 module Main_20231202 exposing (main)
 
 import Custom exposing (Content, Msg)
-import Formatting exposing (background, bulletLink, bullets, code, padded, spacer, text_, title, bullet)
-import Html exposing (a, br, h1, li, span, text, img)
-import Html.Attributes exposing (href, style, target, src)
+import Formatting exposing (background, bullet, bulletLink, bullets, code, colored, padded, spacer, text_, title)
+import Html exposing (a, br, h1, img, li, span, text)
+import Html.Attributes exposing (href, src, style, target)
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
 import SliceShow.Content exposing (item)
 import SliceShow.Slide exposing (setDimensions, slide)
@@ -34,10 +34,12 @@ slides =
 
 cover : List Content
 cover =
-    [ background "assets/images/cover_20231202.jpg"
+    [ colored
+        "hsl(200, 100%, 40%)"
+        "#FFF"
         [ item
-            (h1 [ style "font-size" "7rem" ]
-                [ span [ style "margin" "0",  style "font-size" "5rem" ] [ text "配色のデザイントークンを賢く管理したい！" ]
+            (h1 []
+                [ span [ style "font-size" "5rem" ] [ text "配色のデザイントークンを賢く管理したい！" ]
                 , br [] []
                 , span [ style "font-size" "14rem" ] [ text "elm-css-palette" ]
                 ]
@@ -46,7 +48,7 @@ cover =
         , item
             (img
                 [ src "assets/images/y047aka.png"
-                , style "width" "90px"
+                , style "width" "75px"
                 , style "border-radius" "50%"
                 ]
                 []
@@ -54,7 +56,7 @@ cover =
         , item
             (span
                 [ style "position" "relative"
-                , style "top" "-2.5rem"
+                , style "top" "-2rem"
                 , style "padding-left" "0.5em"
                 , style "font-size" "4.5rem"
                 ]
@@ -143,7 +145,7 @@ history =
                     , br [] []
                     , span [ style "font-size" "2.4rem", style "color" "#999" ]
                         [ a [ href "https://package.elm-lang.org/packages/NoRedInk/noredink-ui/latest/Nri-Ui-Palette-V1#Palette", target "_blank" ] [ text "Nri.Ui.Palette.V1 (NoRedInk/noredink-ui)" ] ]
-                    , li [ style "margin-left" "1em"] [ text "レコードを一括適用する関数は使っていなさそう" ]
+                    , li [ style "margin-left" "1em" ] [ text "レコードを一括適用する関数は使っていなさそう" ]
                     ]
                 )
             , item
@@ -197,10 +199,14 @@ roadmap =
         ]
     ]
 
+
 ending : List Content
 ending =
-    [ padded
+    [ background "assets/images/cover_20231202.jpg"
         [ title "おしまい！"
-        , text_ "似たような事例があれば教えてください"
+        , bullets
+            [ bullet "似たような事例があれば教えてください"
+            , bullet "Blueskyやってます（https://bsky.app/profile/yoshitaka.bsky.social）"
+            ]
         ]
     ]
