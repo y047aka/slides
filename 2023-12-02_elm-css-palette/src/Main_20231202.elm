@@ -54,6 +54,11 @@ issue : List Content
 issue =
     [ padded
         [ title "Issue"
+        , bullets
+            [ bullet "background, color, border を毎回記述するのはめんどくさい"
+            , bullet "たくさんの配色が生まれると、全てを把握するのが大変！"
+            ]
+        , spacer 20
         , code """view : Html Msg
 view =
     div

@@ -7,7 +7,7 @@ import SliceShow.Content exposing (Content, container, item)
 
 slidePadding : String
 slidePadding =
-    "25px 100px"
+    "20px 100px"
 
 
 padded : List (Content a b) -> Content a b
@@ -159,6 +159,6 @@ code : String -> Content model msg
 code str =
     item
         (Html.pre [ style "margin" "0", style "line-height" "0.5" ]
-            [ Html.code [ style "font" "2rem monospace", style "margin" "0" ] [ Html.text str ]
+            [ Html.code [ style "font" "1.8rem monospace", style "margin" "0" ] [ Html.text str ]
             ]
         )
