@@ -27,6 +27,7 @@ slides =
     , howToUse
     , whatIsElmCssPalette
     , history
+    , invert
     , roadmap
     , ending
     ]
@@ -157,6 +158,32 @@ history =
                     ]
                 )
             ]
+        ]
+    ]
+
+
+invert : List Content
+invert =
+    [ padded
+        [ title "Invert"
+        , text_ "既存のPaletteを元に、新しいPaletteを作ることができます。"
+        , spacer 20
+        , code """primaryButton : Palette
+primaryButton =
+    { background = Just (hsl 210 1 0.5)
+    , color = Just (hsl 0 0 1)
+    , border = Just (hsl 210 1 0.6)
+    }
+
+
+secondaryButton : Palette
+secondaryButton =
+    { primaryButton
+        | background = primaryButton.color
+        , color = primaryButton.background
+        , border = Just (hsl 210 1 0.6)
+    }
+"""
         ]
     ]
 
