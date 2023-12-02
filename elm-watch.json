@@ -1,10 +1,16 @@
 {
     "targets": {
-        "2019-08-09_example": {
+        "2023-12-02_elm-css-palette": {
             "inputs": [
-                "2019-08-09_example/src/Main_20190809.elm"
+                "2023-12-02_elm-css-palette/src/Main_20231202.elm"
             ],
-            "output": "public/build/2019-08-09_example.js"
+            "output": "public/build/2023-12-02_elm-css-palette.js"
+        },
+        "2019-08-25_we-are-never-ever-getting-back-together": {
+            "inputs": [
+                "2019-08-25_we-are-never-ever-getting-back-together/src/Main_20190825.elm"
+            ],
+            "output": "public/build/2019-08-25_we-are-never-ever-getting-back-together.js"
         },
         "2019-08-12_elm-starfighter": {
             "inputs": [
@@ -12,11 +18,11 @@
             ],
             "output": "public/build/2019-08-12_elm-starfighter.js"
         },
-        "2019-08-25_we-are-never-ever-getting-back-together": {
+        "2019-08-09_example": {
             "inputs": [
-                "2019-08-25_we-are-never-ever-getting-back-together/src/Main_20190825.elm"
+                "2019-08-09_example/src/Main_20190809.elm"
             ],
-            "output": "public/build/2019-08-25_we-are-never-ever-getting-back-together.js"
+            "output": "public/build/2019-08-09_example.js"
         }
     }
 }
