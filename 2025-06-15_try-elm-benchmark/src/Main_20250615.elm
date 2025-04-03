@@ -1,9 +1,10 @@
 module Main_20250615 exposing (main)
 
+import Css exposing (..)
 import Custom exposing (Content, Msg)
-import Formatting exposing (background, bullet, bulletLink, bullets, code, colored, padded, spacer, text_, title)
-import Html exposing (br, h1, img, span, text)
-import Html.Attributes exposing (src, style)
+import Formatting.Styled as Formatting exposing (background, bullet, bulletLink, bullets, code, colored, padded, spacer, title)
+import Html.Styled as Html exposing (Html, br, h1, img, span, text)
+import Html.Styled.Attributes exposing (css, src)
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
 import SliceShow.Content exposing (item)
 import SliceShow.Slide exposing (setDimensions, slide)
@@ -22,58 +23,59 @@ main =
 
 slides : List (List Content)
 slides =
-    [ cover
-    , introduction
-    , benchmarkSetup
-    , sampleCode
-    , optimization1
-    , optimization2
-    , optimization3
-    , lessonsLearned
-    , realWorldApplications
-    , conclusion
-    ]
+    List.map (List.map (Html.toUnstyled >> item))
+        [ cover
+        , introduction
+        , benchmarkSetup
+        , sampleCode
+        , optimization1
+        , optimization2
+        , optimization3
+        , lessonsLearned
+        , realWorldApplications
+        , conclusion
+        ]
 
 
-cover : List Content
+cover : List (Html msg)
 cover =
     [ colored
         "hsl(200, 100%, 40%)"
         "#FFF"
-        [ item
-            (h1 []
-                [ span [ style "font-size" "5rem" ] [ text "Elmのパフォーマンス、実際どうなの？" ]
-                , br [] []
-                , span [ style "font-size" "14rem" ] [ text "ベンチマークに入門してみた" ]
-                ]
-            )
+        [ h1 []
+            [ span
+                [ css [ fontSize (rem 5) ] ]
+                [ text "Elmのパフォーマンス、実際どうなの？" ]
+            , br [] []
+            , span [ css [ fontSize (rem 14) ] ] [ text "ベンチマークに入門してみた" ]
+            ]
         , spacer 50
-        , item
-            (img
-                [ src "assets/images/y047aka.png"
-                , style "width" "75px"
-                , style "border-radius" "50%"
+        , img
+            [ src "assets/images/y047aka.png"
+            , css
+                [ width (px 75)
+                , borderRadius (pct 50)
                 ]
-                []
-            )
-        , item
-            (span
-                [ style "position" "relative"
-                , style "top" "-2rem"
-                , style "padding-left" "0.5em"
-                , style "font-size" "4.5rem"
+            ]
+            []
+        , span
+            [ css
+                [ position relative
+                , top (rem -2)
+                , paddingLeft (em 0.5)
+                , fontSize (rem 4.5)
                 ]
-                [ text "Yoshitaka Totsuka" ]
-            )
+            ]
+            [ text "Yoshitaka Totsuka" ]
         , spacer 20
-        , text_ "関数型まつり2025"
+        , text "関数型まつり2025"
         , spacer 10
-        , text_ "2025-06-15"
+        , text "2025-06-15"
         ]
     ]
 
 
-introduction : List Content
+introduction : List (Html msg)
 introduction =
     [ padded
         [ title "はじめに"
@@ -84,12 +86,12 @@ introduction =
             , bullet "今回の検証の目的"
             ]
         , spacer 20
-        , text_ "型安全性や開発体験の良さが注目されがちですが、実際のパフォーマンスはどうなのでしょうか？"
+        , text "型安全性や開発体験の良さが注目されがちですが、実際のパフォーマンスはどうなのでしょうか？"
         ]
     ]
 
 
-benchmarkSetup : List Content
+benchmarkSetup : List (Html msg)
 benchmarkSetup =
     [ padded
         [ title "ベンチマーク環境の準備"
@@ -116,7 +118,7 @@ suite =
     ]
 
 
-sampleCode : List Content
+sampleCode : List (Html msg)
 sampleCode =
     [ padded
         [ title "検証用サンプルコード"
@@ -154,7 +156,7 @@ parseCsvLine line =
     ]
 
 
-optimization1 : List Content
+optimization1 : List (Html msg)
 optimization1 =
     [ padded
         [ title "最適化の試み①：データ構造の選択"
@@ -183,7 +185,7 @@ processCsvData csv =
     ]
 
 
-optimization2 : List Content
+optimization2 : List (Html msg)
 optimization2 =
     [ padded
         [ title "最適化の試み②：本当のボトルネックを探る"
@@ -217,7 +219,7 @@ processCsvData csv =
     ]
 
 
-optimization3 : List Content
+optimization3 : List (Html msg)
 optimization3 =
     [ padded
         [ title "最適化の試み③：入力データ形式の変更"
@@ -248,7 +250,7 @@ processJsonData json =
     ]
 
 
-lessonsLearned : List Content
+lessonsLearned : List (Html msg)
 lessonsLearned =
     [ padded
         [ title "ベンチマークから得られた知見"
@@ -273,7 +275,7 @@ lessonsLearned =
     ]
 
 
-realWorldApplications : List Content
+realWorldApplications : List (Html msg)
 realWorldApplications =
     [ padded
         [ title "実際のアプリケーションでの考慮点"
@@ -296,7 +298,7 @@ realWorldApplications =
     ]
 
 
-conclusion : List Content
+conclusion : List (Html msg)
 conclusion =
     [ background "assets/images/cover_20231202.jpg"
         [ title "まとめ"
