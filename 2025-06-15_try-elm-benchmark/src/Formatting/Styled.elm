@@ -1,8 +1,9 @@
-module Formatting.Styled exposing (background, bullet, bulletLink, bullets, code, col, color, colored, group, image, noPointerEvents, padded, position, row, spacer, title)
+module Formatting.Styled exposing (background, col, color, colored, image, markdown, markdownPage, markdownWithTitle, noPointerEvents, padded, position, row, spacer, title)
 
 import Css exposing (..)
-import Html.Styled as Html exposing (Html, a, div, h1, img, li, text, ul)
-import Html.Styled.Attributes as Attributes exposing (css, href, src)
+import Html.Styled as Html exposing (Html, div, h1, img, text)
+import Html.Styled.Attributes as Attributes exposing (css, src)
+import Markdown
 
 
 slidePadding : Css.Style
@@ -103,60 +104,23 @@ row contents =
         contents
 
 
-group : Int -> Int -> Int -> Int -> List (Html msg) -> Html msg
-group left top width_ height_ content =
-    div
-        [ css
-            [ Css.position absolute
-            , Css.left (px (toFloat left))
-            , Css.top (px (toFloat top))
-            , Css.width (px (toFloat width_))
-            , Css.height (px (toFloat height_))
-            ]
-        ]
-        content
-
-
 noPointerEvents : Html msg -> Html msg
 noPointerEvents content =
     div [ css [ pointerEvents none ] ]
         [ content ]
 
 
-bullets : List (Html msg) -> Html msg
-bullets =
-    ul []
+markdown : String -> Html msg
+markdown markdownStr =
+    Markdown.toHtml [] markdownStr
+        |> Html.fromUnstyled
 
 
-bullet : String -> Html msg
-bullet str =
-    li [] [ text str ]
+markdownWithTitle : String -> Html msg
+markdownWithTitle markdownStr =
+    markdown markdownStr
 
 
-bulletLink : String -> String -> Html msg
-bulletLink str url =
-    li []
-        [ a
-            [ href url
-            , Attributes.target "_blank"
-            , css [ Css.color inherit ]
-            ]
-            [ text str ]
-        ]
-
-
-{-| Code block
--}
-code : String -> Html msg
-code str =
-    Html.pre
-        [ css [ margin zero, lineHeight (num 0.5) ] ]
-        [ Html.code
-            [ css
-                [ fontFamilies [ "monospace" ]
-                , fontSize (rem 1.8)
-                , margin zero
-                ]
-            ]
-            [ text str ]
-        ]
+markdownPage : String -> Html msg
+markdownPage markdownStr =
+    padded [ markdownWithTitle markdownStr ]

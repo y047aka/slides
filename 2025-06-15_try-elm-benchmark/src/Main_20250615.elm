@@ -2,7 +2,7 @@ module Main_20250615 exposing (main)
 
 import Css exposing (..)
 import Custom exposing (Content, Msg)
-import Formatting.Styled as Formatting exposing (background, bullet, bulletLink, bullets, code, colored, padded, spacer, title)
+import Formatting.Styled as Formatting exposing (background, colored, markdownPage, markdownWithTitle, spacer)
 import Html.Styled as Html exposing (Html, br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
@@ -77,31 +77,30 @@ cover =
 
 introduction : List (Html msg)
 introduction =
-    [ padded
-        [ title "はじめに"
-        , bullets
-            [ bullet "Elmの紹介と特徴"
-            , bullet "パフォーマンスに関する一般的な認識と疑問"
-            , bullet "Elmは遅いのか？速いのか？"
-            , bullet "今回の検証の目的"
-            ]
-        , spacer 20
-        , text "型安全性や開発体験の良さが注目されがちですが、実際のパフォーマンスはどうなのでしょうか？"
-        ]
+    [ markdownPage """
+# はじめに
+
+- Elmの紹介と特徴
+- パフォーマンスに関する一般的な認識と疑問
+- Elmは遅いのか？速いのか？
+- 今回の検証の目的
+
+型安全性や開発体験の良さが注目されがちですが、実際のパフォーマンスはどうなのでしょうか？
+"""
     ]
 
 
 benchmarkSetup : List (Html msg)
 benchmarkSetup =
-    [ padded
-        [ title "ベンチマーク環境の準備"
-        , bullets
-            [ bulletLink "elm-benchmarkの紹介と基本的な使い方" "https://package.elm-lang.org/packages/elm-explorations/benchmark/latest/"
-            , bullet "ベンチマークの結果解釈と注意点（JITコンパイルの影響など）"
-            , bullet "測定環境と条件の説明"
-            ]
-        , spacer 20
-        , code """import Benchmark exposing (Benchmark, describe, benchmark)
+    [ markdownPage """
+# ベンチマーク環境の準備
+
+- [elm-benchmarkの紹介と基本的な使い方](https://package.elm-lang.org/packages/elm-explorations/benchmark/latest/)
+- ベンチマークの結果解釈と注意点（JITコンパイルの影響など）
+- 測定環境と条件の説明
+
+```elm
+import Benchmark exposing (Benchmark, describe, benchmark)
 import Benchmark.Runner exposing (BenchmarkProgram, program)
 
 main : BenchmarkProgram
@@ -113,22 +112,22 @@ suite =
     describe "CSV Processing Performance"
         [ benchmark "Process 10k rows" processCsvData
         ]
+```
 """
-        ]
     ]
 
 
 sampleCode : List (Html msg)
 sampleCode =
-    [ padded
-        [ title "検証用サンプルコード"
-        , bullets
-            [ bullet "1万行のCSVをデコード＆前処理するサンプルコード"
-            , bullet "初期実装の説明とパフォーマンス測定"
-            , bullet "ボトルネックの予測"
-            ]
-        , spacer 20
-        , code """type alias CsvData =
+    [ markdownPage """
+# 検証用サンプルコード
+
+- 1万行のCSVをデコード＆前処理するサンプルコード
+- 初期実装の説明とパフォーマンス測定
+- ボトルネックの予測
+
+```elm
+type alias CsvData =
     { id : Int
     , name : String
     , value : Float
@@ -151,23 +150,23 @@ parseCsvLine line =
             }
         _ ->
             { id = 0, name = "", value = 0 }
+```
 """
-        ]
     ]
 
 
 optimization1 : List (Html msg)
 optimization1 =
-    [ padded
-        [ title "最適化の試み①：データ構造の選択"
-        , bullets
-            [ bullet "List と Array の特性比較"
-            , bullet "List を Array に置き換えた実装"
-            , bullet "パフォーマンスの変化と考察"
-            , bullet "その他のデータ構造の考慮点（Record vs Tuple、カスタムタイプ設計）"
-            ]
-        , spacer 20
-        , code """import Array exposing (Array)
+    [ markdownPage """
+# 最適化の試み①：データ構造の選択
+
+- List と Array の特性比較
+- List を Array に置き換えた実装
+- パフォーマンスの変化と考察
+- その他のデータ構造の考慮点（Record vs Tuple、カスタムタイプ設計）
+
+```elm
+import Array exposing (Array)
 
 processCsvData : String -> Array CsvData
 processCsvData csv =
@@ -180,22 +179,22 @@ processCsvData csv =
 -- 処理速度: List実装 vs Array実装
 -- List: 2.4 seconds
 -- Array: 1.8 seconds (25%改善)
+```
 """
-        ]
     ]
 
 
 optimization2 : List (Html msg)
 optimization2 =
-    [ padded
-        [ title "最適化の試み②：本当のボトルネックを探る"
-        , bullets
-            [ bullet "プロファイリングによるボトルネック特定"
-            , bullet "改善策の検討と実装（遅延評価パターンの適用など）"
-            , bullet "改善前後の比較"
-            ]
-        , spacer 20
-        , code """import Csv.Decode as Decode
+    [ markdownPage """
+# 最適化の試み②：本当のボトルネックを探る
+
+- プロファイリングによるボトルネック特定
+- 改善策の検討と実装（遅延評価パターンの適用など）
+- 改善前後の比較
+
+```elm
+import Csv.Decode as Decode
 import Csv
 
 -- 文字列分割とパースが最大のボトルネック
@@ -214,22 +213,22 @@ processCsvData csv =
 -- 処理速度: 手動実装 vs csvデコーダー
 -- 手動実装: 1.8 seconds
 -- csvデコーダー: 0.9 seconds (50%改善)
+```
 """
-        ]
     ]
 
 
 optimization3 : List (Html msg)
 optimization3 =
-    [ padded
-        [ title "最適化の試み③：入力データ形式の変更"
-        , bullets
-            [ bullet "CSVとJSONの処理特性の違い"
-            , bullet "JSONデコードに変更した実装"
-            , bullet "パフォーマンスへの影響"
-            ]
-        , spacer 20
-        , code """import Json.Decode as Decode
+    [ markdownPage """
+# 最適化の試み③：入力データ形式の変更
+
+- CSVとJSONの処理特性の違い
+- JSONデコードに変更した実装
+- パフォーマンスへの影響
+
+```elm
+import Json.Decode as Decode
 
 jsonDecoder : Decode.Decoder CsvData
 jsonDecoder =
@@ -245,23 +244,23 @@ processJsonData json =
 -- 処理速度: CSV vs JSON
 -- CSV: 0.9 seconds
 -- JSON: 0.4 seconds (55%改善)
+```
 """
-        ]
     ]
 
 
 lessonsLearned : List (Html msg)
 lessonsLearned =
-    [ padded
-        [ title "ベンチマークから得られた知見"
-        , bullets
-            [ bullet "データ構造選択の影響度（List vs Array）"
-            , bullet "専用デコーダーの重要性"
-            , bullet "データ量とパフォーマンスの関係性"
-            , bullet "Elm特有の最適化ポイント"
-            ]
-        , spacer 20
-        , code """-- 最初の実装と最終実装の比較
+    [ markdownPage """
+# ベンチマークから得られた知見
+
+- データ構造選択の影響度（List vs Array）
+- 専用デコーダーの重要性
+- データ量とパフォーマンスの関係性
+- Elm特有の最適化ポイント
+
+```
+-- 最初の実装と最終実装の比較
 -- 処理速度: 初期実装 vs 最適化後
 -- 初期実装: 2.4 seconds
 -- 最適化後: 0.4 seconds (83%改善)
@@ -270,22 +269,22 @@ lessonsLearned =
 1. 専用デコーダーの利用
 2. 適切なデータ構造の選択
 3. 入力データ形式の最適化
+```
 """
-        ]
     ]
 
 
 realWorldApplications : List (Html msg)
 realWorldApplications =
-    [ padded
-        [ title "実際のアプリケーションでの考慮点"
-        , bullets
-            [ bullet "データ処理と DOM操作の違い"
-            , bullet "The Elm Architectureでのパフォーマンス考慮点"
-            , bullet "実務での優先順位の決め方"
-            ]
-        , spacer 20
-        , code """-- パフォーマンス問題の主な種類:
+    [ markdownPage """
+# 実際のアプリケーションでの考慮点
+
+- データ処理と DOM操作の違い
+- The Elm Architectureでのパフォーマンス考慮点
+- 実務での優先順位の決め方
+
+```elm
+-- パフォーマンス問題の主な種類:
 1. 初期化時間の遅さ (大量データの初期ロード)
 2. 更新処理の遅さ (Updateサイクルの最適化)
 3. 描画の遅さ (DOM操作の最小化)
@@ -293,22 +292,23 @@ realWorldApplications =
 -- The Elm Architectureでの最適化
 -- Html.Lazy, Html.Keyed の活用
 -- モデル設計の見直し
+```
 """
-        ]
     ]
 
 
 conclusion : List (Html msg)
 conclusion =
     [ background "assets/images/cover_20231202.jpg"
-        [ title "まとめ"
-        , bullets
-            [ bullet "検証結果の総括: 適切な最適化で大幅な改善が可能"
-            , bullet "効果的な最適化アプローチ"
-            , bullet "測定してから最適化することの重要性"
-            , bullet "今後の展望"
-            ]
-        , spacer 20
-        , bulletLink "サンプルコードとベンチマーク結果" "https://github.com/y047aka/elm-benchmark-example"
+        [ markdownWithTitle """
+# まとめ
+
+- 検証結果の総括: 適切な最適化で大幅な改善が可能
+- 効果的な最適化アプローチ
+- 測定してから最適化することの重要性
+- 今後の展望
+
+[サンプルコードとベンチマーク結果](https://github.com/y047aka/elm-benchmark-example)
+"""
         ]
     ]
