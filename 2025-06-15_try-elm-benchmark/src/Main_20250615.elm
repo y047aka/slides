@@ -2,7 +2,7 @@ module Main_20250615 exposing (main)
 
 import Css exposing (..)
 import Custom exposing (Content, Msg)
-import Formatting.Styled as Formatting exposing (background, colored, markdownPage, markdownWithTitle, spacer)
+import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
 import Html.Styled as Html exposing (Html, br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
@@ -300,7 +300,7 @@ realWorldApplications =
 conclusion : List (Html msg)
 conclusion =
     [ background "assets/images/cover_20231202.jpg"
-        [ markdownWithTitle """
+        [ markdown """
 # まとめ
 
 - 検証結果の総括: 適切な最適化で大幅な改善が可能

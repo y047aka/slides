@@ -1,4 +1,4 @@
-module Formatting.Styled exposing (background, col, color, colored, image, markdown, markdownPage, markdownWithTitle, noPointerEvents, padded, position, row, spacer, title)
+module Formatting.Styled exposing (background, col, color, colored, image, markdown, markdownPage, noPointerEvents, padded, position, row, spacer, title)
 
 import Css exposing (..)
 import Html.Styled as Html exposing (Html, div, h1, img, text)
@@ -116,11 +116,6 @@ markdown markdownStr =
         |> Html.fromUnstyled
 
 
-markdownWithTitle : String -> Html msg
-markdownWithTitle markdownStr =
-    markdown markdownStr
-
-
 markdownPage : String -> Html msg
 markdownPage markdownStr =
-    padded [ markdownWithTitle markdownStr ]
+    padded [ markdown markdownStr ]
