@@ -31,9 +31,12 @@ slides =
         , elmBenchmark_2
         , sampleData
         , exampleCode
-        , benchmark_1
+        , benchmark
         , optimizationIdeas
-        , optimization1
+        , listToArray_1
+        , listToArray_2
+        , listToArray_3
+        , listToArray_4
         , optimization2
         , optimization3
         , lessonsLearned
@@ -208,10 +211,10 @@ preprocess laps =
     ]
 
 
-benchmark_1 : List (Html msg)
-benchmark_1 =
+benchmark : List (Html msg)
+benchmark =
     [ markdownPage """
-# 最初のベンチマーク
+# 最初の計測
 
 TODO: elm-benchmarkの結果を表示
 """
@@ -221,7 +224,7 @@ TODO: elm-benchmarkの結果を表示
 optimizationIdeas : List (Html msg)
 optimizationIdeas =
     [ markdownPage """
-# 当時考えていた最適化のアイデア
+# 最適化のアイデア
 
 - `List` を `Array` に置き換える
     - 1万行以上のデータを扱うので効果を期待できるかもしれない？
@@ -232,31 +235,44 @@ optimizationIdeas =
     ]
 
 
-optimization1 : List (Html msg)
-optimization1 =
+listToArray_1 : List (Html msg)
+listToArray_1 =
     [ markdownPage """
-# 最適化の試み①：データ構造の選択
+# 最適化①：`List` を `Array` に置き換える
 
-- List と Array の特性比較
-- List を Array に置き換えた実装
-- パフォーマンスの変化と考察
-- その他のデータ構造の考慮点（Record vs Tuple、カスタムタイプ設計）
+- 測定結果から判明した問題点: 大量データのリスト処理が遅い
+- Listは線形検索、Arrayはインデックスアクセスに強い
+- 1万行以上のCSVデータには特に効果的な可能性
+"""
+    ]
 
-```elm
-import Array exposing (Array)
 
-processCsvData : String -> Array CsvData
-processCsvData csv =
-    csv
-        |> String.lines
-        |> List.drop 1  -- ヘッダー行をスキップ
-        |> List.map parseCsvLine
-        |> Array.fromList
+listToArray_2 : List (Html msg)
+listToArray_2 =
+    [ markdownPage """
+# 最適化①：`List` を `Array` に置き換える
 
--- 処理速度: List実装 vs Array実装
--- List: 2.4 seconds
--- Array: 1.8 seconds (25%改善)
-```
+TODO: 改善後のコードを表示
+"""
+    ]
+
+
+listToArray_3 : List (Html msg)
+listToArray_3 =
+    [ markdownPage """
+# 計測①：`List` を `Array` に置き換える
+
+TODO: elm-benchmarkの結果を表示
+"""
+    ]
+
+
+listToArray_4 : List (Html msg)
+listToArray_4 =
+    [ markdownPage """
+# 最適化①：`List` を `Array` に置き換える
+
+TODO: 測定結果の分析を表示
 """
     ]
 
