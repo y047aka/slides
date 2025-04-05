@@ -11,7 +11,7 @@ import Markdown.Renderer exposing (Renderer)
 
 slidePadding : Css.Style
 slidePadding =
-    padding2 (px 50) (px 80)
+    padding2 (px 40) (px 80)
 
 
 padded : List (Html msg) -> Html msg
@@ -132,7 +132,7 @@ customizedHtmlRenderer =
         \{ level, children } ->
             case level of
                 Block.H1 ->
-                    Html.h1 [ css [ margin zero ] ] children
+                    Html.h1 [ css [ margin zero, fontSize (em 1.4) ] ] children
 
                 Block.H2 ->
                     Html.h2 [] children

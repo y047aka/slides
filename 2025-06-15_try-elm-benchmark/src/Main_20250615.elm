@@ -28,7 +28,9 @@ slides =
         , introduction
         , elmBenchmark_1
         , elmBenchmark_2
-        , sampleCode
+        , sampleData
+        , exampleCode
+        , benchmark_1
         , optimization1
         , optimization2
         , optimization3
@@ -130,40 +132,72 @@ suite =
     ]
 
 
-sampleCode : List (Html msg)
-sampleCode =
+sampleData : List (Html msg)
+sampleData =
     [ markdownPage """
-# 検証用サンプルコード
+# 検証用サンプルデータ
 
-- 1万行のCSVをデコード＆前処理するサンプルコード
-- 初期実装の説明とパフォーマンス測定
-- ボトルネックの予測
+- ル・マン24時間レース（2024年）の全車両の走行データ
+
+```csv
+NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LINE_IN_PIT; S1; S1_IMPROVEMENT; S2; S2_IMPROVEMENT; S3; S3_IMPROVEMENT; KPH; ELAPSED; HOUR;S1_LARGE;S2_LARGE;S3_LARGE;TOP_SPEED;DRIVER_NAME;PIT_TIME;CLASS;GROUP;TEAM;MANUFACTURER;FLAG_AT_FL;S1_SECONDS;S2_SECONDS;S3_SECONDS;
+10;2;1;3:53.276;0;;45.985;0;1:26.214;0;1:41.077;0;208.1;3:53.276;16:04:19.878;0:45.985;1:26.214;1:41.077;316.3;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;45.985;86.214;101.077;
+10;2;2;3:39.529;0;;34.734;0;1:24.901;0;1:39.894;0;223.4;7:32.805;16:07:59.407;0:34.734;1:24.901;1:39.894;315.4;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.734;84.901;99.894;
+10;2;3;3:39.240;2;;34.715;0;1:24.814;0;1:39.711;0;223.7;11:12.045;16:11:38.647;0:34.715;1:24.814;1:39.711;313.6;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.715;84.814;99.711;
+10;2;4;3:39.458;0;;34.774;0;1:24.878;0;1:39.806;0;223.5;14:51.503;16:15:18.105;0:34.774;1:24.878;1:39.806;313.6;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.774;84.878;99.806;
+10;2;5;3:39.364;0;;34.676;0;1:24.777;0;1:39.911;0;223.6;18:30.867;16:18:57.469;0:34.676;1:24.777;1:39.911;314.5;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.676;84.777;99.911;
+10;2;6;3:40.955;0;;35.178;0;1:25.610;0;1:40.167;0;222.0;22:11.822;16:22:38.424;0:35.178;1:25.610;1:40.167;312.7;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;35.178;85.610;100.167;
+10;2;7;3:40.463;0;;34.798;0;1:24.912;0;1:40.753;0;222.5;25:52.285;16:26:18.887;0:34.798;1:24.912;1:40.753;315.4;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.798;84.912;100.753;
+10;2;8;3:40.552;0;;35.068;0;1:24.982;0;1:40.502;0;222.4;29:32.837;16:29:59.439;0:35.068;1:24.982;1:40.502;313.6;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;35.068;84.982;100.502;
+10;2;9;3:46.324;0;B;34.905;0;1:24.760;0;1:46.659;0;216.7;33:19.161;16:33:45.763;0:34.905;1:24.760;1:46.659;313.6;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.905;84.760;106.659;
+10;2;10;4:58.334;0;;1:51.808;0;1:25.765;0;1:40.761;0;164.4;38:17.495;16:38:44.097;1:51.808;1:25.765;1:40.761;309.1;Patrick PILET;0:01:27.261;LMP2;;Vector Sport;Oreca;GF;111.808;85.765;100.761;
+10;2;11;3:43.277;0;;36.637;0;1:25.990;0;1:40.650;0;219.7;42:00.772;16:42:27.374;0:36.637;1:25.990;1:40.650;310.9;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;36.637;85.990;100.650;
+…
+99;2;251;4:07.503;0;;40.250;0;1:31.114;0;1:56.139;0;198.2;24:05:35.985;16:06:02.587;0:40.250;1:31.114;1:56.139;242.0;Harry TINCKNELL;;HYPERCAR;H;Proton Competition;Porsche;FF;40.250;91.114;116.139;
+```
+"""
+    ]
+
+
+exampleCode : List (Html msg)
+exampleCode =
+    [ markdownPage """
+# 最初の実装
 
 ```elm
-type alias CsvData =
-    { id : Int
-    , name : String
-    , value : Float
-    }
-
-processCsvData : String -> List CsvData
-processCsvData csv =
+{-| CSVをパースし、周回データとしてデコードする -}
+csvDecoded : List Wec.Lap
+csvDecoded =
     csv
-        |> String.lines
-        |> List.drop 1  -- ヘッダー行をスキップ
-        |> List.map parseCsvLine
+        |> Csv.Decode.decodeCustom { fieldSeparator = ';' } FieldNamesFromFirstRow lapDecoder
+        |> Result.withDefault []
 
-parseCsvLine : String -> CsvData
-parseCsvLine line =
-    case String.split "," line of
-        [ idStr, name, valueStr ] ->
-            { id = String.toInt idStr |> Maybe.withDefault 0
-            , name = name
-            , value = String.toFloat valueStr |> Maybe.withDefault 0
-            }
-        _ ->
-            { id = 0, name = "", value = 0 }
+{-| 周回データを車両単位で前処理する -}
+preprocess : List Wec.Lap -> List Car
+preprocess laps =
+    laps
+        |> AssocList.Extra.groupBy .carNumber
+        |> AssocList.toList
+        |> List.map
+            (\\( carNumber, laps_ ) ->
+                preprocess_deprecated
+                    { carNumber = carNumber
+                    , laps = laps_
+                    , startPositions = startPositions
+                    , ordersByLap = ordersByLap
+                    }
+            )
 ```
+"""
+    ]
+
+
+benchmark_1 : List (Html msg)
+benchmark_1 =
+    [ markdownPage """
+# 最初のベンチマーク
+
+TODO: elm-benchmarkの結果を表示
 """
     ]
 
