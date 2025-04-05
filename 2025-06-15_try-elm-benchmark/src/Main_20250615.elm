@@ -26,7 +26,8 @@ slides =
     List.map (List.map (Html.toUnstyled >> item))
         [ cover
         , introduction
-        , benchmarkSetup
+        , elmBenchmark_1
+        , elmBenchmark_2
         , sampleCode
         , optimization1
         , optimization2
@@ -90,27 +91,39 @@ introduction =
     ]
 
 
-benchmarkSetup : List (Html msg)
-benchmarkSetup =
+elmBenchmark_1 : List (Html msg)
+elmBenchmark_1 =
     [ markdownPage """
-# ベンチマーク環境の準備
+# elm-benchmark
 
-- [elm-benchmarkの紹介と基本的な使い方](https://package.elm-lang.org/packages/elm-explorations/benchmark/latest/)
-- ベンチマークの結果解釈と注意点（JITコンパイルの影響など）
-- 測定環境と条件の説明
+- Elmコードの性能測定ツール
+    - JITコンパイル最適化を考慮したウォームアップ処理
+        - JavaScriptエンジンの挙動を理解した正確な測定
+    - 統計的に有意な結果を得るための反復実行機能
+    - わかりやすい視覚的出力（グラフ表示）
+"""
+    ]
+
+
+elmBenchmark_2 : List (Html msg)
+elmBenchmark_2 =
+    [ markdownPage """
+# elm-benchmark
 
 ```elm
-import Benchmark exposing (Benchmark, describe, benchmark)
-import Benchmark.Runner exposing (BenchmarkProgram, program)
-
-main : BenchmarkProgram
-main =
-    program suite
-
 suite : Benchmark
 suite =
-    describe "CSV Processing Performance"
-        [ benchmark "Process 10k rows" processCsvData
+    let
+        sampleArray =
+            Array.initialize 100 identity
+    in
+    describe "Array"
+        [ describe "slice"
+            [ benchmark "from the beginning" <|
+                \\_ -> Array.slice 50 100 sampleArray
+            , benchmark "from the end" <|
+                \\_ -> Array.slice 0 50 sampleArray
+            ]
         ]
 ```
 """
