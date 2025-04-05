@@ -26,6 +26,7 @@ slides =
     List.map (List.map (Html.toUnstyled >> item))
         [ cover
         , introduction
+        , motivation
         , elmBenchmark_1
         , elmBenchmark_2
         , sampleData
@@ -90,6 +91,20 @@ introduction =
 - 今回の検証の目的
 
 型安全性や開発体験の良さが注目されがちですが、実際のパフォーマンスはどうなのでしょうか？
+"""
+    ]
+
+
+motivation : List (Html msg)
+motivation =
+    [ markdownPage """
+# パフォーマンス計測の動機
+
+- 好奇心
+    - 一度くらい elm-benchmark を使ってみたい
+    - `List` と `Array` のパフォーマンスの違いを知りたい
+- 非効率なコードが残っているうちに試したい
+    - 改善の幅が大きいほうが楽しい
 """
     ]
 
