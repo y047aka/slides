@@ -113,18 +113,17 @@ noPointerEvents content =
         [ content ]
 
 
-markdown : String -> Html msg
+markdown : String -> List (Html msg)
 markdown markdownStr =
     Markdown.Parser.parse markdownStr
         |> Result.mapError (always "")
         |> Result.andThen (Markdown.Renderer.render customizedHtmlRenderer)
         |> Result.withDefault []
-        |> div []
 
 
 markdownPage : String -> Html msg
 markdownPage markdownStr =
-    padded [ markdown markdownStr ]
+    padded (markdown markdownStr)
 
 
 customizedHtmlRenderer : Renderer (Html msg)

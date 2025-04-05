@@ -300,7 +300,7 @@ realWorldApplications =
 conclusion : List (Html msg)
 conclusion =
     [ background "assets/images/cover_20231202.jpg"
-        [ markdown """
+        (markdown """
 # まとめ
 
 - 検証結果の総括: 適切な最適化で大幅な改善が可能
@@ -309,6 +309,5 @@ conclusion =
 - 今後の展望
 
 [サンプルコードとベンチマーク結果](https://github.com/y047aka/elm-benchmark-example)
-"""
-        ]
+""")
     ]
