@@ -31,6 +31,7 @@ slides =
         , sampleData
         , exampleCode
         , benchmark_1
+        , optimizationIdeas
         , optimization1
         , optimization2
         , optimization3
@@ -198,6 +199,21 @@ benchmark_1 =
 # 最初のベンチマーク
 
 TODO: elm-benchmarkの結果を表示
+"""
+    ]
+
+
+optimizationIdeas : List (Html msg)
+optimizationIdeas =
+    [ markdownPage """
+# 当時考えていた最適化のアイデア
+
+- `List` を `Array` に置き換える
+    - `Array` 型の紹介としては聞くが、試したことはなかった
+    - 1万行以上のデータを扱うので効果を期待できるかもしれない？
+- `AssocList` を `Dict` に置き換える
+- CSVのデコードパッケージを自作する
+    - デコード結果を `Array` で受け取ることができれば早くなるのでは？
 """
     ]
 
