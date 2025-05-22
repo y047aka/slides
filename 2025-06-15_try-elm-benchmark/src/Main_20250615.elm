@@ -2,9 +2,11 @@ module Main_20250615 exposing (main)
 
 import Css exposing (..)
 import Custom exposing (Content, Msg)
+import Dict
 import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
 import Html.Styled as Html exposing (Html, br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
+import MyBenchmark as Benchmark exposing (Benchmark)
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
 import SliceShow.Content exposing (item)
 import SliceShow.Slide exposing (setDimensions, slide)
@@ -23,25 +25,29 @@ main =
 
 slides : List (List Content)
 slides =
-    List.map (List.map (Html.toUnstyled >> item))
-        [ cover
-        , introduction
-        , motivation
-        , elmBenchmark_1
-        , elmBenchmark_2
-        , sampleData
-        , exampleCode
-        , benchmark
-        , optimizationIdeas
-        , listToArray_1
-        , listToArray_2
-        , listToArray_3
-        , listToArray_4
-        , optimization2
-        , optimization3
-        , lessonsLearned
-        , realWorldApplications
-        , conclusion
+    List.concat
+        [ List.map (List.map (Html.toUnstyled >> item))
+            [ cover
+            , introduction
+            , motivation
+            , elmBenchmark_1
+            , elmBenchmark_2
+            , sampleData
+            , exampleCode
+            ]
+        , [ benchmark ]
+        , List.map (List.map (Html.toUnstyled >> item))
+            [ optimizationIdeas
+            , listToArray_1
+            , listToArray_2
+            , listToArray_3
+            , listToArray_4
+            , optimization2
+            , optimization3
+            , lessonsLearned
+            , realWorldApplications
+            , conclusion
+            ]
         ]
 
 
@@ -211,14 +217,31 @@ preprocess laps =
     ]
 
 
-benchmark : List (Html msg)
+benchmark : List Content
 benchmark =
-    [ markdownPage """
+    [ item <| Html.toUnstyled <| markdownPage """
 # 最初の計測
-
-TODO: elm-benchmarkの結果を表示
 """
+    , Custom.benchmark_1 benchmarkSuite
     ]
+
+
+benchmarkSuite : Benchmark
+benchmarkSuite =
+    Benchmark.describe "sample"
+        [ dict ]
+
+
+dict : Benchmark
+dict =
+    let
+        dest =
+            Dict.singleton "a" 1
+    in
+    Benchmark.describe "dictionary"
+        [ Benchmark.benchmark "get" (\_ -> Dict.get "a" dest)
+        , Benchmark.benchmark "insert" (\_ -> Dict.insert "b" 2 dest)
+        ]
 
 
 optimizationIdeas : List (Html msg)

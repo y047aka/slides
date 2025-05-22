@@ -1,4 +1,4 @@
-module MyBenchmark.Runner.App exposing (Model, Msg, init, update, view)
+module MyBenchmark.Runner.App exposing (Model, Msg(..), init, update, view)
 
 import Element exposing (..)
 import Element.Attributes exposing (..)
