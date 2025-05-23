@@ -1,4 +1,4 @@
-module Custom exposing (Content, Model, Msg, benchmark_1, subscriptions, update, view)
+module Custom exposing (Content, Model, Msg, benchmark, subscriptions, update, view)
 
 import Custom.Benchmark as Benchmark
 import Html exposing (Html)
@@ -18,9 +18,9 @@ type Msg
     = BenchmarkMsg Benchmark.Msg
 
 
-benchmark_1 : Benchmark -> Content
-benchmark_1 benchmark =
-    Content.custom (BenchmarkModel (Benchmark.init benchmark))
+benchmark : Benchmark -> Content
+benchmark benchmark_ =
+    Content.custom (BenchmarkModel (Benchmark.init benchmark_))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

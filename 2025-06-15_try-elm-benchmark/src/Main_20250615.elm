@@ -6,7 +6,7 @@ import Dict
 import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
 import Html.Styled as Html exposing (Html, br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
-import MyBenchmark as Benchmark exposing (Benchmark)
+import MyBenchmark as Benchmark
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
 import SliceShow.Content exposing (item)
 import SliceShow.Slide exposing (setDimensions, slide)
@@ -32,7 +32,10 @@ slides =
             , motivation
             , elmBenchmark_1
             , elmBenchmark_2
-            , sampleData
+            ]
+        , [ elmBenchmark_3 ]
+        , List.map (List.map (Html.toUnstyled >> item))
+            [ sampleData
             , exampleCode
             ]
         , [ benchmark ]
@@ -157,6 +160,23 @@ suite =
     ]
 
 
+elmBenchmark_3 : List Content
+elmBenchmark_3 =
+    [ item <| Html.toUnstyled <| markdownPage "# elm-benchmark"
+    , Custom.benchmark <|
+        let
+            dest =
+                Dict.singleton "a" 1
+        in
+        Benchmark.describe "sample"
+            [ Benchmark.describe "dictionary"
+                [ Benchmark.benchmark "get" (\_ -> Dict.get "a" dest)
+                , Benchmark.benchmark "insert" (\_ -> Dict.insert "b" 2 dest)
+                ]
+            ]
+    ]
+
+
 sampleData : List (Html msg)
 sampleData =
     [ markdownPage """
@@ -219,29 +239,8 @@ preprocess laps =
 
 benchmark : List Content
 benchmark =
-    [ item <| Html.toUnstyled <| markdownPage """
-# 最初の計測
-"""
-    , Custom.benchmark_1 benchmarkSuite
+    [ item <| Html.toUnstyled <| markdownPage "# 最初の計測"
     ]
-
-
-benchmarkSuite : Benchmark
-benchmarkSuite =
-    Benchmark.describe "sample"
-        [ dict ]
-
-
-dict : Benchmark
-dict =
-    let
-        dest =
-            Dict.singleton "a" 1
-    in
-    Benchmark.describe "dictionary"
-        [ Benchmark.benchmark "get" (\_ -> Dict.get "a" dest)
-        , Benchmark.benchmark "insert" (\_ -> Dict.insert "b" 2 dest)
-        ]
 
 
 optimizationIdeas : List (Html msg)
