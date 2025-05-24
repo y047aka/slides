@@ -270,43 +270,38 @@ listToArray_1 =
 -}
 listLengthVsArrayLength : List Content
 listLengthVsArrayLength =
-    [ let
-        -- TODO: Fixtureへの差し替えを検討
-        dummyData =
-            List.range 0 10000
-      in
-      Custom.benchmark <|
+    [ Custom.benchmark <|
         Benchmark.describe "length" <|
             [ Benchmark.benchmark "List.length"
                 (\_ ->
                     -- 295,670 runs/s (GoF: 99.98%)
-                    List.length dummyData
+                    List.length Fixture.csvDecoded
                 )
             , let
-                dummyData_array =
-                    Array.fromList dummyData
+                csvDecoded_array =
+                    Array.fromList Fixture.csvDecoded
               in
               Benchmark.compare "Array.length"
                 "List.length"
                 (\_ ->
                     -- 296,394 runs/s (GoF: 99.99%)
-                    List.length dummyData
+                    List.length Fixture.csvDecoded
                 )
                 "Array.length"
                 (\_ ->
                     -- 290,366,954 runs/s (GoF: 99.99%)
-                    Array.length dummyData_array
+                    Array.length csvDecoded_array
                 )
             , Benchmark.compare "Array.fromList >> Array.length"
                 "List.length"
                 (\_ ->
                     -- 296,512 runs/s (GoF: 99.98%)
-                    List.length dummyData
+                    List.length Fixture.csvDecoded
                 )
                 "Array.length"
                 (\_ ->
                     -- 644,729 runs/s (GoF: 99.99%)
-                    (Array.fromList >> Array.length) dummyData
+                    (Array.fromList >> Array.length) Fixture.csvDecoded
                 )
             ]
     ]
