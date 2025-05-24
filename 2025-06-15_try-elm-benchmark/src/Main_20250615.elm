@@ -1,6 +1,6 @@
 module Main_20250615 exposing (main)
 
-import Array
+import Array exposing (Array)
 import Css exposing (..)
 import Custom exposing (Content, Msg)
 import Data.Fixture as Fixture
@@ -11,7 +11,6 @@ import Html.Styled as Html exposing (br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import MyBenchmark as Benchmark
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
-import SliceShow.Content exposing (item)
 import SliceShow.Slide exposing (setDimensions, slide)
 
 
@@ -337,7 +336,7 @@ TODO: elm-benchmarkの結果を表示
                 "startPositions_array"
                 (\_ ->
                     -- 172,226 runs/s (GoF: 99.94%)
-                    startPositions_array Fixture.csvDecoded
+                    startPositions_array (Array.fromList Fixture.csvDecoded)
                 )
             ]
     ]
@@ -350,10 +349,9 @@ startPositions_list laps =
         |> List.map .carNumber
 
 
-startPositions_array : List Wec.Lap -> List String
+startPositions_array : Array Wec.Lap -> List String
 startPositions_array laps =
-    Array.fromList laps
-        |> Array.filter (\{ lapNumber } -> lapNumber == 1)
+    Array.filter (\{ lapNumber } -> lapNumber == 1) laps
         |> Array.toList
         |> List.sortBy .elapsed
         |> List.map .carNumber
