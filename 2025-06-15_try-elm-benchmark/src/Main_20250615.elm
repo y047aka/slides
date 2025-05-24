@@ -3,6 +3,8 @@ module Main_20250615 exposing (main)
 import Array
 import Css exposing (..)
 import Custom exposing (Content, Msg)
+import Data.Fixture as Fixture
+import Data.Wec.Decoder as Wec
 import Dict
 import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
 import Html.Styled as Html exposing (br, h1, img, span, text)
@@ -320,6 +322,8 @@ TODO: 改善後のコードを表示
     ]
 
 
+{-| <https://github.com/y047aka/elm-motorsport-analysis/pull/4/commits/fc830456108acf98ebb9a9ed65e81032d0b85637>
+-}
 listToArray_3 : List Content
 listToArray_3 =
     [ markdownPage """
@@ -327,7 +331,37 @@ listToArray_3 =
 
 TODO: elm-benchmarkの結果を表示
 """
+    , Custom.benchmark <|
+        Benchmark.describe "Data.Wec.Preprocess"
+            [ Benchmark.compare "startPositions"
+                "startPositions_list"
+                (\_ ->
+                    -- 127,809 runs/s (GoF: 99.98%)
+                    startPositions_list Fixture.csvDecoded
+                )
+                "startPositions_array"
+                (\_ ->
+                    -- 172,226 runs/s (GoF: 99.94%)
+                    startPositions_array Fixture.csvDecoded
+                )
+            ]
     ]
+
+
+startPositions_list : List Wec.Lap -> List String
+startPositions_list laps =
+    List.filter (\{ lapNumber } -> lapNumber == 1) laps
+        |> List.sortBy .elapsed
+        |> List.map .carNumber
+
+
+startPositions_array : List Wec.Lap -> List String
+startPositions_array laps =
+    Array.fromList laps
+        |> Array.filter (\{ lapNumber } -> lapNumber == 1)
+        |> Array.toList
+        |> List.sortBy .elapsed
+        |> List.map .carNumber
 
 
 listToArray_4 : List Content
