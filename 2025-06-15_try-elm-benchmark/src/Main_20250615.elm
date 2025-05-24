@@ -1,5 +1,6 @@
 module Main_20250615 exposing (main)
 
+import Array
 import Css exposing (..)
 import Custom exposing (Content, Msg)
 import Dict
@@ -42,7 +43,10 @@ slides =
         , List.map (List.map (Html.toUnstyled >> item))
             [ optimizationIdeas
             , listToArray_1
-            , listToArray_2
+            ]
+        , [ listLengthVsArrayLength ]
+        , List.map (List.map (Html.toUnstyled >> item))
+            [ listToArray_2
             , listToArray_3
             , listToArray_4
             , optimization2
@@ -266,6 +270,52 @@ listToArray_1 =
 - Listは線形検索、Arrayはインデックスアクセスに強い
 - 1万行以上のCSVデータには特に効果的な可能性
 """
+    ]
+
+
+{-| <https://github.com/y047aka/elm-motorsport-analysis/pull/4/commits/98e10ec08c46a0aa6549fe01bbf41d9125387dbc>
+-}
+listLengthVsArrayLength : List Content
+listLengthVsArrayLength =
+    [ let
+        -- TODO: Fixtureへの差し替えを検討
+        dummyData =
+            List.range 0 10000
+      in
+      Custom.benchmark <|
+        Benchmark.describe "length" <|
+            [ Benchmark.benchmark "List.length"
+                (\_ ->
+                    -- 295,670 runs/s (GoF: 99.98%)
+                    List.length dummyData
+                )
+            , let
+                dummyData_array =
+                    Array.fromList dummyData
+              in
+              Benchmark.compare "Array.length"
+                "List.length"
+                (\_ ->
+                    -- 296,394 runs/s (GoF: 99.99%)
+                    List.length dummyData
+                )
+                "Array.length"
+                (\_ ->
+                    -- 290,366,954 runs/s (GoF: 99.99%)
+                    Array.length dummyData_array
+                )
+            , Benchmark.compare "Array.fromList >> Array.length"
+                "List.length"
+                (\_ ->
+                    -- 296,512 runs/s (GoF: 99.98%)
+                    List.length dummyData
+                )
+                "Array.length"
+                (\_ ->
+                    -- 644,729 runs/s (GoF: 99.99%)
+                    (Array.fromList >> Array.length) dummyData
+                )
+            ]
     ]
 
 
