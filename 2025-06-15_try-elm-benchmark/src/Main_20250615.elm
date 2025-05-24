@@ -5,7 +5,7 @@ import Css exposing (..)
 import Custom exposing (Content, Msg)
 import Dict
 import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
-import Html.Styled as Html exposing (Html, br, h1, img, span, text)
+import Html.Styled as Html exposing (br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import MyBenchmark as Benchmark
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
@@ -26,39 +26,30 @@ main =
 
 slides : List (List Content)
 slides =
-    List.concat
-        [ List.map (List.map (Html.toUnstyled >> item))
-            [ cover
-            , introduction
-            , motivation
-            , elmBenchmark_1
-            , elmBenchmark_2
-            ]
-        , [ elmBenchmark_3 ]
-        , List.map (List.map (Html.toUnstyled >> item))
-            [ sampleData
-            , exampleCode
-            ]
-        , [ benchmark ]
-        , List.map (List.map (Html.toUnstyled >> item))
-            [ optimizationIdeas
-            , listToArray_1
-            ]
-        , [ listLengthVsArrayLength ]
-        , List.map (List.map (Html.toUnstyled >> item))
-            [ listToArray_2
-            , listToArray_3
-            , listToArray_4
-            , optimization2
-            , optimization3
-            , lessonsLearned
-            , realWorldApplications
-            , conclusion
-            ]
-        ]
+    [ cover
+    , introduction
+    , motivation
+    , elmBenchmark_1
+    , elmBenchmark_2
+    , elmBenchmark_3
+    , sampleData
+    , exampleCode
+    , benchmark
+    , optimizationIdeas
+    , listToArray_1
+    , listLengthVsArrayLength
+    , listToArray_2
+    , listToArray_3
+    , listToArray_4
+    , optimization2
+    , optimization3
+    , lessonsLearned
+    , realWorldApplications
+    , conclusion
+    ]
 
 
-cover : List (Html msg)
+cover : List Content
 cover =
     [ colored
         "hsl(200, 100%, 40%)"
@@ -96,7 +87,7 @@ cover =
     ]
 
 
-introduction : List (Html msg)
+introduction : List Content
 introduction =
     [ markdownPage """
 # はじめに
@@ -111,7 +102,7 @@ introduction =
     ]
 
 
-motivation : List (Html msg)
+motivation : List Content
 motivation =
     [ markdownPage """
 # パフォーマンス計測の動機
@@ -125,7 +116,7 @@ motivation =
     ]
 
 
-elmBenchmark_1 : List (Html msg)
+elmBenchmark_1 : List Content
 elmBenchmark_1 =
     [ markdownPage """
 # elm-benchmark
@@ -139,7 +130,7 @@ elmBenchmark_1 =
     ]
 
 
-elmBenchmark_2 : List (Html msg)
+elmBenchmark_2 : List Content
 elmBenchmark_2 =
     [ markdownPage """
 # elm-benchmark
@@ -166,7 +157,7 @@ suite =
 
 elmBenchmark_3 : List Content
 elmBenchmark_3 =
-    [ item <| Html.toUnstyled <| markdownPage "# elm-benchmark"
+    [ markdownPage "# elm-benchmark"
     , Custom.benchmark <|
         let
             dest =
@@ -181,7 +172,7 @@ elmBenchmark_3 =
     ]
 
 
-sampleData : List (Html msg)
+sampleData : List Content
 sampleData =
     [ markdownPage """
 # 検証用サンプルデータ
@@ -208,7 +199,7 @@ NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LI
     ]
 
 
-exampleCode : List (Html msg)
+exampleCode : List Content
 exampleCode =
     [ markdownPage """
 # 最初の実装
@@ -243,11 +234,11 @@ preprocess laps =
 
 benchmark : List Content
 benchmark =
-    [ item <| Html.toUnstyled <| markdownPage "# 最初の計測"
+    [ markdownPage "# 最初の計測"
     ]
 
 
-optimizationIdeas : List (Html msg)
+optimizationIdeas : List Content
 optimizationIdeas =
     [ markdownPage """
 # 最適化のアイデア
@@ -261,7 +252,7 @@ optimizationIdeas =
     ]
 
 
-listToArray_1 : List (Html msg)
+listToArray_1 : List Content
 listToArray_1 =
     [ markdownPage """
 # 最適化①：`List` を `Array` に置き換える
@@ -319,7 +310,7 @@ listLengthVsArrayLength =
     ]
 
 
-listToArray_2 : List (Html msg)
+listToArray_2 : List Content
 listToArray_2 =
     [ markdownPage """
 # 最適化①：`List` を `Array` に置き換える
@@ -329,7 +320,7 @@ TODO: 改善後のコードを表示
     ]
 
 
-listToArray_3 : List (Html msg)
+listToArray_3 : List Content
 listToArray_3 =
     [ markdownPage """
 # 計測①：`List` を `Array` に置き換える
@@ -339,7 +330,7 @@ TODO: elm-benchmarkの結果を表示
     ]
 
 
-listToArray_4 : List (Html msg)
+listToArray_4 : List Content
 listToArray_4 =
     [ markdownPage """
 # 最適化①：`List` を `Array` に置き換える
@@ -349,7 +340,7 @@ TODO: 測定結果の分析を表示
     ]
 
 
-optimization2 : List (Html msg)
+optimization2 : List Content
 optimization2 =
     [ markdownPage """
 # 最適化の試み②：本当のボトルネックを探る
@@ -383,7 +374,7 @@ processCsvData csv =
     ]
 
 
-optimization3 : List (Html msg)
+optimization3 : List Content
 optimization3 =
     [ markdownPage """
 # 最適化の試み③：入力データ形式の変更
@@ -414,7 +405,7 @@ processJsonData json =
     ]
 
 
-lessonsLearned : List (Html msg)
+lessonsLearned : List Content
 lessonsLearned =
     [ markdownPage """
 # ベンチマークから得られた知見
@@ -439,7 +430,7 @@ lessonsLearned =
     ]
 
 
-realWorldApplications : List (Html msg)
+realWorldApplications : List Content
 realWorldApplications =
     [ markdownPage """
 # 実際のアプリケーションでの考慮点
@@ -462,7 +453,7 @@ realWorldApplications =
     ]
 
 
-conclusion : List (Html msg)
+conclusion : List Content
 conclusion =
     [ background "assets/images/cover_20231202.jpg"
         (markdown """

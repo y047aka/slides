@@ -7,6 +7,7 @@ import Markdown.Block as Block
 import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer exposing (Renderer)
+import SliceShow.Content exposing (Content, container, item)
 
 
 slidePadding : Css.Style
@@ -19,19 +20,22 @@ padded =
     div [ css [ slidePadding ] ]
 
 
-background : String -> List (Html msg) -> Html msg
-background url =
-    div
-        [ css
-            [ Css.height (pct 100)
-            , boxSizing borderBox
-            , padding3 (px 10) (px 100) (px 20)
-            , backgroundImage (Css.url url)
-            , backgroundSize Css.cover
-            , Css.color (hex "FFF")
-            , textShadow4 zero zero (px 50) (hex "000")
-            ]
-        ]
+background : String -> List (Html msg) -> Content model msg
+background url children =
+    item <|
+        Html.toUnstyled <|
+            div
+                [ css
+                    [ Css.height (pct 100)
+                    , boxSizing borderBox
+                    , padding3 (px 10) (px 100) (px 20)
+                    , backgroundImage (Css.url url)
+                    , backgroundSize Css.cover
+                    , Css.color (hex "FFF")
+                    , textShadow4 zero zero (px 50) (hex "000")
+                    ]
+                ]
+                children
 
 
 spacer : Int -> Html msg
@@ -49,17 +53,20 @@ image w h url =
         []
 
 
-colored : String -> String -> List (Html msg) -> Html msg
-colored color1 color2 =
-    div
-        [ css
-            [ Css.height (pct 100)
-            , boxSizing borderBox
-            , slidePadding
-            , property "background-color" color1
-            , property "color" color2
-            ]
-        ]
+colored : String -> String -> List (Html msg) -> Content model msg
+colored color1 color2 children =
+    item <|
+        Html.toUnstyled <|
+            div
+                [ css
+                    [ Css.height (pct 100)
+                    , boxSizing borderBox
+                    , slidePadding
+                    , property "background-color" color1
+                    , property "color" color2
+                    ]
+                ]
+                children
 
 
 title : String -> Html msg
@@ -121,9 +128,12 @@ markdown markdownStr =
         |> Result.withDefault []
 
 
-markdownPage : String -> Html msg
+markdownPage : String -> Content model msg
 markdownPage markdownStr =
-    padded (markdown markdownStr)
+    markdown markdownStr
+        |> padded
+        |> Html.toUnstyled
+        |> item
 
 
 customizedHtmlRenderer : Renderer (Html msg)
