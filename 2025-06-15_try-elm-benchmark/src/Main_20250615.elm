@@ -52,6 +52,7 @@ slides =
     , optimization2
     , optimization3
     , optimization3_1
+    , optimization3_2
     , optimization4
     , lessonsLearned
     , realWorldApplications
@@ -247,7 +248,17 @@ benchmark_1 =
     [ markdownPage "# 最初の計測"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
-            [ let
+            [ Benchmark.scale "old"
+                ([ 10 -- 67,307 runs/s (GoF: 99.99%)
+                 , 100 -- 1,272 runs/s (GoF: 99.99%)
+
+                 --  , 1000 -- 62 runs/s (GoF: 99.99%)
+                 --  , 5000 -- 11 runs/s (GoF: 100%)
+                 ]
+                    |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> old target ))
+                )
+            , let
                 options =
                     { carNumber = "15"
                     , laps = Fixture.csvDecodedForCarNumber "15"
@@ -262,6 +273,39 @@ benchmark_1 =
                 )
             ]
     ]
+
+
+old : List Wec.Lap -> List Car
+old laps =
+    let
+        startPositions =
+            List.filter (\{ lapNumber } -> lapNumber == 1) laps
+                |> List.sortBy .elapsed
+                |> List.map .carNumber
+
+        ordersByLap =
+            laps
+                |> AssocList.Extra.groupBy .lapNumber
+                |> AssocList.toList
+                |> List.map
+                    (\( lapNumber, cars ) ->
+                        { lapNumber = lapNumber
+                        , order = cars |> List.sortBy .elapsed |> List.map .carNumber
+                        }
+                    )
+    in
+    laps
+        |> AssocList.Extra.groupBy .carNumber
+        |> AssocList.toList
+        |> List.map
+            (\( carNumber, laps__ ) ->
+                preprocess_old
+                    { carNumber = carNumber
+                    , laps = laps__
+                    , startPositions = startPositions
+                    , ordersByLap = ordersByLap
+                    }
+            )
 
 
 type alias OrdersByLap =
@@ -598,6 +642,35 @@ optimization3_1 =
                 "improved"
                 -- 2,215 runs/s (GoF: 99.95%)
                 (\_ -> Data.Wec.Preprocess.preprocess_ options)
+            ]
+    ]
+
+
+optimization3_2 : List Content
+optimization3_2 =
+    [ markdownPage "# 最適化の試み③：計算ロジックを改良する"
+    , Custom.benchmark <|
+        Benchmark.describe "Data.Wec.Preprocess.preprocess"
+            [ Benchmark.scale "old"
+                ([ 10 -- 67,307 runs/s (GoF: 99.99%)
+                 , 100 -- 1,272 runs/s (GoF: 99.99%)
+
+                 --  , 1000 -- 62 runs/s (GoF: 99.99%)
+                 --  , 5000 -- 11 runs/s (GoF: 100%)
+                 ]
+                    |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> old target ))
+                )
+            , Benchmark.scale "improved"
+                ([ 10 -- 117,702 runs/s (GoF: 99.99%)
+                 , 100 -- 5,654 runs/s (GoF: 99.98%)
+
+                 --  , 1000 -- 167 runs/s (GoF: 99.99%)
+                 --  , 5000 -- 27 runs/s (GoF: 100%)
+                 ]
+                    |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> Data.Wec.Preprocess.preprocess target ))
+                )
             ]
     ]
 
