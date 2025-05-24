@@ -319,11 +319,7 @@ TODO: 改善後のコードを表示
 -}
 listToArray_3 : List Content
 listToArray_3 =
-    [ markdownPage """
-# 計測①：`List` を `Array` に置き換える
-
-TODO: elm-benchmarkの結果を表示
-"""
+    [ markdownPage "# 計測①：`List` を `Array` に置き換える"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ Benchmark.scale "startPositions_list"
