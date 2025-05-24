@@ -12,6 +12,9 @@ import Dict
 import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
 import Html.Styled as Html exposing (br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
+import List.Extra
+import Motorsport.Car exposing (Car)
+import Motorsport.Class as Class
 import Motorsport.Lap exposing (Lap)
 import MyBenchmark as Benchmark
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
@@ -39,7 +42,7 @@ slides =
     , elmBenchmark_3
     , sampleData
     , exampleCode
-    , benchmark
+    , benchmark_1
     , optimizationIdeas
     , listToArray_1
     , listLengthVsArrayLength
@@ -48,6 +51,7 @@ slides =
     , listToArray_4
     , optimization2
     , optimization3
+    , optimization3_1
     , optimization4
     , lessonsLearned
     , realWorldApplications
@@ -238,10 +242,135 @@ preprocess laps =
     ]
 
 
-benchmark : List Content
-benchmark =
+benchmark_1 : List Content
+benchmark_1 =
     [ markdownPage "# 最初の計測"
+    , Custom.benchmark <|
+        Benchmark.describe "Data.Wec.Preprocess"
+            [ let
+                options =
+                    { carNumber = "15"
+                    , laps = Fixture.csvDecodedForCarNumber "15"
+                    , startPositions = startPositions_list Fixture.csvDecoded
+                    , ordersByLap = ordersByLap_list Fixture.csvDecoded
+                    }
+              in
+              Benchmark.benchmark "preprocess_"
+                (\_ ->
+                    -- 375 runs/s (GoF: 100%)
+                    preprocess_old options
+                )
+            ]
     ]
+
+
+ordersByLap_list : List Wec.Lap -> OrdersByLap
+ordersByLap_list laps =
+    laps
+        |> AssocList.Extra.groupBy .lapNumber
+        |> AssocList.toList
+        |> List.map
+            (\( lapNumber, cars ) ->
+                { lapNumber = lapNumber
+                , order = cars |> List.sortBy .elapsed |> List.map .carNumber
+                }
+            )
+
+
+preprocess_old :
+    { carNumber : String
+    , laps : List Wec.Lap
+    , startPositions : List String
+    , ordersByLap : OrdersByLap
+    }
+    -> Car
+preprocess_old { carNumber, laps, startPositions, ordersByLap } =
+    let
+        { currentDriver_, class_, group_, team_, manufacturer_ } =
+            List.head laps
+                |> Maybe.map
+                    (\{ driverName, class, group, team, manufacturer } ->
+                        { currentDriver_ = driverName
+                        , class_ = class
+                        , group_ = group
+                        , team_ = team
+                        , manufacturer_ = manufacturer
+                        }
+                    )
+                |> Maybe.withDefault
+                    { class_ = Class.none
+                    , team_ = ""
+                    , group_ = ""
+                    , currentDriver_ = ""
+                    , manufacturer_ = ""
+                    }
+
+        drivers =
+            List.Extra.uniqueBy .driverName laps
+                |> List.map
+                    (\{ driverName } ->
+                        { name = driverName
+                        , isCurrentDriver = driverName == currentDriver_
+                        }
+                    )
+
+        startPosition =
+            startPositions
+                |> List.Extra.findIndex ((==) carNumber)
+                |> Maybe.withDefault 0
+
+        laps_ =
+            laps
+                |> List.indexedMap
+                    (\index { driverName, lapNumber, lapTime, s1, s2, s3, elapsed } ->
+                        { carNumber = carNumber
+                        , driver = driverName
+                        , lap = lapNumber
+                        , position =
+                            Data.Wec.Preprocess.getPositionAt { carNumber = carNumber, lapNumber = lapNumber } ordersByLap
+                        , time = lapTime
+                        , best =
+                            laps
+                                |> List.take (index + 1)
+                                |> List.map .lapTime
+                                |> List.minimum
+                                |> Maybe.withDefault 0
+                        , sector_1 = Maybe.withDefault 0 s1
+                        , sector_2 = Maybe.withDefault 0 s2
+                        , sector_3 = Maybe.withDefault 0 s3
+                        , s1_best =
+                            laps
+                                |> List.take (index + 1)
+                                |> List.filterMap .s1
+                                |> List.minimum
+                                |> Maybe.withDefault 0
+                        , s2_best =
+                            laps
+                                |> List.take (index + 1)
+                                |> List.filterMap .s2
+                                |> List.minimum
+                                |> Maybe.withDefault 0
+                        , s3_best =
+                            laps
+                                |> List.take (index + 1)
+                                |> List.filterMap .s3
+                                |> List.minimum
+                                |> Maybe.withDefault 0
+                        , elapsed = elapsed
+                        }
+                    )
+    in
+    { carNumber = carNumber
+    , drivers = drivers
+    , class = class_
+    , group = group_
+    , team = team_
+    , manufacturer = manufacturer_
+    , startPosition = startPosition
+    , laps = laps_
+    , currentLap = Nothing
+    , lastLap = Nothing
+    }
 
 
 optimizationIdeas : List Content
@@ -437,19 +566,6 @@ type alias OrdersByLap =
     List { lapNumber : Int, order : List String }
 
 
-ordersByLap_list : List Wec.Lap -> OrdersByLap
-ordersByLap_list laps =
-    laps
-        |> AssocList.Extra.groupBy .lapNumber
-        |> AssocList.toList
-        |> List.map
-            (\( lapNumber, cars ) ->
-                { lapNumber = lapNumber
-                , order = cars |> List.sortBy .elapsed |> List.map .carNumber
-                }
-            )
-
-
 laps_old :
     { carNumber : String
     , laps : List Wec.Lap
@@ -562,6 +678,30 @@ laps_improved { carNumber, laps, ordersByLap } =
         |> List.foldl step initialAcc
         |> .laps
         |> List.reverse
+
+
+optimization3_1 : List Content
+optimization3_1 =
+    [ markdownPage "# 最適化の試み③：計算ロジックを改良する"
+    , Custom.benchmark <|
+        Benchmark.describe "Data.Wec.Preprocess"
+            [ let
+                options =
+                    { carNumber = "15"
+                    , laps = Fixture.csvDecodedForCarNumber "15"
+                    , startPositions = startPositions_list Fixture.csvDecoded
+                    , ordersByLap = ordersByLap_list Fixture.csvDecoded
+                    }
+              in
+              Benchmark.compare "preprocess_"
+                "old"
+                -- 349 runs/s (GoF: 99.99%)
+                (\_ -> preprocess_old options)
+                "improved"
+                -- 2,215 runs/s (GoF: 99.95%)
+                (\_ -> Data.Wec.Preprocess.preprocess_ options)
+            ]
+    ]
 
 
 optimization4 : List Content
