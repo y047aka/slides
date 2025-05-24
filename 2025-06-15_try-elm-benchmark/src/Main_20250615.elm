@@ -318,19 +318,31 @@ TODO: elm-benchmarkの結果を表示
 """
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
-            [ Benchmark.compare "startPositions"
-                "startPositions_list"
-                (\_ ->
-                    -- 127,809 runs/s (GoF: 99.98%)
-                    startPositions_list Fixture.csvDecoded
+            [ Benchmark.scale "startPositions_list"
+                ([ 0 -- 32,796,129 runs/s (GoF: 99.97%)
+                 , 100 -- 847,795 runs/s (GoF: 99.99%)
+                 , 200 -- 398,531 runs/s (GoF: 99.99%)
+                 , 500 -- 153,345 runs/s (GoF: 99.98%)
+                 ]
+                    |> List.map (\size -> ( size, csvDecodedOfSize size ))
+                    |> List.map (\( size, target ) -> ( "n = " ++ String.fromInt size, \_ -> startPositions_list target ))
                 )
-                "startPositions_array"
-                (\_ ->
-                    -- 172,226 runs/s (GoF: 99.94%)
-                    startPositions_array (Array.fromList Fixture.csvDecoded)
+            , Benchmark.scale "startPositions_array"
+                ([ 0 -- 10,061,597 runs/s (GoF: 99.99%)
+                 , 100 -- 817,089 runs/s (GoF: 99.97%)
+                 , 200 -- 484,857 runs/s (GoF: 99.96%)
+                 , 500 -- 202,018 runs/s (GoF: 99.94%)
+                 ]
+                    |> List.map (\size -> ( size, csvDecodedOfSize size ))
+                    |> List.map (\( size, target ) -> ( "n = " ++ String.fromInt size, \_ -> startPositions_array (Array.fromList target) ))
                 )
             ]
     ]
+
+
+csvDecodedOfSize : Int -> List Wec.Lap
+csvDecodedOfSize size =
+    List.take size Fixture.csvDecoded
 
 
 startPositions_list : List Wec.Lap -> List String
