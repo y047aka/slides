@@ -277,14 +277,14 @@ listLengthVsArrayLength =
                  , 500 -- 367,023 runs/s (GoF: 99.99%)
                  ]
                     |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
-                    |> List.map (\( size, target ) -> ( "n = " ++ String.fromInt size, \_ -> List.length target ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> List.length target ))
                 )
             , Benchmark.scale "Array.length"
                 ([ 0 -- 269,282,707 runs/s (GoF: 99.99%)
                  , 500 -- 269,150,399 runs/s (GoF: 99.99%)
                  ]
                     |> List.map (\size -> ( size, Array.fromList (Fixture.csvDecodedOfSize size) ))
-                    |> List.map (\( size, target ) -> ( "n = " ++ String.fromInt size, \_ -> Array.length target ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> Array.length target ))
                 )
             , Benchmark.scale "Array.fromList >> Array.length"
                 ([ 0 -- 41,046,798 runs/s (GoF: 99.98%)
@@ -292,10 +292,15 @@ listLengthVsArrayLength =
                  , 500 -- 780,566 runs/s (GoF: 100%)
                  ]
                     |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
-                    |> List.map (\( size, target ) -> ( "n = " ++ String.fromInt size, \_ -> (Array.fromList >> Array.length) target ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> (Array.fromList >> Array.length) target ))
                 )
             ]
     ]
+
+
+toString : Int -> String
+toString n =
+    "n = " ++ String.fromInt n
 
 
 listToArray_2 : List Content
@@ -326,7 +331,7 @@ TODO: elm-benchmarkの結果を表示
                  , 500 -- 153,345 runs/s (GoF: 99.98%)
                  ]
                     |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
-                    |> List.map (\( size, target ) -> ( "n = " ++ String.fromInt size, \_ -> startPositions_list target ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_list target ))
                 )
             , Benchmark.scale "startPositions_array"
                 ([ 0 -- 10,061,597 runs/s (GoF: 99.99%)
@@ -335,7 +340,7 @@ TODO: elm-benchmarkの結果を表示
                  , 500 -- 202,018 runs/s (GoF: 99.94%)
                  ]
                     |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
-                    |> List.map (\( size, target ) -> ( "n = " ++ String.fromInt size, \_ -> startPositions_array (Array.fromList target) ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_array (Array.fromList target) ))
                 )
             ]
     ]
