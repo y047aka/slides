@@ -1,8 +1,6 @@
 module Main_20250615 exposing (main)
 
 import Array exposing (Array)
-import AssocList
-import AssocList.Extra
 import Css exposing (..)
 import Custom exposing (Content, Msg)
 import Data.Fixture as Fixture
@@ -259,8 +257,8 @@ benchmark_1 =
                 options =
                     { carNumber = "15"
                     , laps = Fixture.csvDecodedForCarNumber "15"
-                    , startPositions = startPositions_list Fixture.csvDecoded
-                    , ordersByLap = ordersByLap_list Fixture.csvDecoded
+                    , startPositions = Beginning.startPositions_list Fixture.csvDecoded
+                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
                     }
               in
               Benchmark.benchmark "preprocess_"
@@ -270,23 +268,6 @@ benchmark_1 =
                 )
             ]
     ]
-
-
-type alias OrdersByLap =
-    List { lapNumber : Int, order : List String }
-
-
-ordersByLap_list : List Wec.Lap -> OrdersByLap
-ordersByLap_list laps =
-    laps
-        |> AssocList.Extra.groupBy .lapNumber
-        |> AssocList.toList
-        |> List.map
-            (\( lapNumber, cars ) ->
-                { lapNumber = lapNumber
-                , order = cars |> List.sortBy .elapsed |> List.map .carNumber
-                }
-            )
 
 
 optimizationIdeas : List Content
@@ -381,7 +362,7 @@ listToArray_3 =
                  , 5000 -- 21,238 runs/s (GoF: 99.85%)
                  ]
                     |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
-                    |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_list target ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.startPositions_list target ))
                 )
             , Benchmark.scale "startPositions_array"
                 ([ 5 -- 3,936,471 runs/s (GoF: 99.95%)
@@ -394,13 +375,6 @@ listToArray_3 =
                 )
             ]
     ]
-
-
-startPositions_list : List Wec.Lap -> List String
-startPositions_list laps =
-    List.filter (\{ lapNumber } -> lapNumber == 1) laps
-        |> List.sortBy .elapsed
-        |> List.map .carNumber
 
 
 startPositions_array : Array Wec.Lap -> List String
@@ -464,7 +438,7 @@ optimization3 =
                 options =
                     { carNumber = "15"
                     , laps = Fixture.csvDecodedForCarNumber "15"
-                    , ordersByLap = ordersByLap_list Fixture.csvDecoded
+                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
                     }
               in
               Benchmark.compare "laps_"
@@ -487,8 +461,8 @@ optimization3_1 =
                 options =
                     { carNumber = "15"
                     , laps = Fixture.csvDecodedForCarNumber "15"
-                    , startPositions = startPositions_list Fixture.csvDecoded
-                    , ordersByLap = ordersByLap_list Fixture.csvDecoded
+                    , startPositions = Beginning.startPositions_list Fixture.csvDecoded
+                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
                     }
               in
               Benchmark.compare "preprocess_"

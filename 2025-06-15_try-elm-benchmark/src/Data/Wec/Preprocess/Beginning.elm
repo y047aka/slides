@@ -1,4 +1,16 @@
-module Data.Wec.Preprocess.Beginning exposing (laps_, preprocess, preprocess_)
+module Data.Wec.Preprocess.Beginning exposing
+    ( preprocess
+    , startPositions_list, ordersByLap_list, preprocess_
+    , laps_
+    )
+
+{-|
+
+@docs preprocess
+@docs startPositions_list, ordersByLap_list, preprocess_
+@docs laps_
+
+-}
 
 import AssocList
 import AssocList.Extra
@@ -13,20 +25,10 @@ preprocess : List Wec.Lap -> List Car
 preprocess laps =
     let
         startPositions =
-            List.filter (\{ lapNumber } -> lapNumber == 1) laps
-                |> List.sortBy .elapsed
-                |> List.map .carNumber
+            startPositions_list laps
 
         ordersByLap =
-            laps
-                |> AssocList.Extra.groupBy .lapNumber
-                |> AssocList.toList
-                |> List.map
-                    (\( lapNumber, cars ) ->
-                        { lapNumber = lapNumber
-                        , order = cars |> List.sortBy .elapsed |> List.map .carNumber
-                        }
-                    )
+            ordersByLap_list laps
     in
     laps
         |> AssocList.Extra.groupBy .carNumber
@@ -42,15 +44,28 @@ preprocess laps =
             )
 
 
+startPositions_list : List Wec.Lap -> List String
+startPositions_list laps =
+    List.filter (\{ lapNumber } -> lapNumber == 1) laps
+        |> List.sortBy .elapsed
+        |> List.map .carNumber
+
+
 type alias OrdersByLap =
     List { lapNumber : Int, order : List String }
 
 
-getPositionAt : { carNumber : String, lapNumber : Int } -> OrdersByLap -> Maybe Int
-getPositionAt { carNumber, lapNumber } ordersByLap =
-    ordersByLap
-        |> List.Extra.find (.lapNumber >> (==) lapNumber)
-        |> Maybe.andThen (.order >> List.Extra.findIndex ((==) carNumber))
+ordersByLap_list : List Wec.Lap -> OrdersByLap
+ordersByLap_list laps =
+    laps
+        |> AssocList.Extra.groupBy .lapNumber
+        |> AssocList.toList
+        |> List.map
+            (\( lapNumber, cars ) ->
+                { lapNumber = lapNumber
+                , order = cars |> List.sortBy .elapsed |> List.map .carNumber
+                }
+            )
 
 
 preprocess_ :
@@ -159,3 +174,10 @@ laps_ { carNumber, laps, ordersByLap } =
                 , elapsed = elapsed
                 }
             )
+
+
+getPositionAt : { carNumber : String, lapNumber : Int } -> OrdersByLap -> Maybe Int
+getPositionAt { carNumber, lapNumber } ordersByLap =
+    ordersByLap
+        |> List.Extra.find (.lapNumber >> (==) lapNumber)
+        |> Maybe.andThen (.order >> List.Extra.findIndex ((==) carNumber))
