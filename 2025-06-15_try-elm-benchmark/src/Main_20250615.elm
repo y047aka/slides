@@ -270,17 +270,8 @@ listToArray_1 =
 listLengthVsArrayLength : List Content
 listLengthVsArrayLength =
     [ Custom.benchmark <|
-        Benchmark.describe "length" <|
-            [ Benchmark.benchmark "List.length"
-                (\_ ->
-                    -- 295,670 runs/s (GoF: 99.98%)
-                    List.length Fixture.csvDecoded
-                )
-            , let
-                csvDecoded_array =
-                    Array.fromList Fixture.csvDecoded
-              in
-              Benchmark.compare "Array.length"
+        Benchmark.describe "Array" <|
+            [ Benchmark.compare "length"
                 "List.length"
                 (\_ ->
                     -- 296,394 runs/s (GoF: 99.99%)
@@ -289,9 +280,9 @@ listLengthVsArrayLength =
                 "Array.length"
                 (\_ ->
                     -- 290,366,954 runs/s (GoF: 99.99%)
-                    Array.length csvDecoded_array
+                    Array.length Fixture.csvDecoded_array
                 )
-            , Benchmark.compare "Array.fromList >> Array.length"
+            , Benchmark.compare "fromList >> length"
                 "List.length"
                 (\_ ->
                     -- 296,512 runs/s (GoF: 99.98%)
