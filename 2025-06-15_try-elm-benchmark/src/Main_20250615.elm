@@ -2,8 +2,11 @@ module Main_20250615 exposing (main)
 
 import Array exposing (Array)
 import Css exposing (..)
+import Csv.Decode as CD exposing (FieldNames(..))
 import Custom exposing (Content, Msg)
-import Data.Fixture as Fixture
+import Data.Fixture.Csv as Fixture
+import Data.Fixture.Json as Fixture
+import Data.Wec
 import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
@@ -12,6 +15,7 @@ import Dict
 import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
 import Html.Styled as Html exposing (br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
+import Json.Decode as JD
 import MyBenchmark as Benchmark
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
 import SliceShow.Slide exposing (setDimensions, slide)
@@ -51,6 +55,7 @@ slides =
     , optimization3_1
     , optimization3_2
     , optimization4
+    , optimization4_1
     , lessonsLearned
     , realWorldApplications
     , conclusion
@@ -536,7 +541,7 @@ optimization3_2 =
 optimization4 : List Content
 optimization4 =
     [ markdownPage """
-# 最適化の試み③：入力データ形式の変更
+# 最適化の試み④：入力データ形式の変更
 
 - CSVとJSONの処理特性の違い
 - JSONデコードに変更した実装
@@ -561,6 +566,38 @@ processJsonData json =
 -- JSON: 0.4 seconds (55%改善)
 ```
 """
+    ]
+
+
+optimization4_1 : List Content
+optimization4_1 =
+    [ markdownPage "# 最適化の試み④：入力データ形式の変更"
+    , Custom.benchmark <|
+        Benchmark.describe "Data.Wec.Preprocess"
+            [ Benchmark.compare "xxxDecoded"
+                "csvDecoded"
+                -- 307 runs/s (GoF: 99.99%) ※426件のデータで実施
+                -- 24 runs/s (GoF: 99.99%)
+                (\_ ->
+                    case CD.decodeCustom { fieldSeparator = ';' } FieldNamesFromFirstRow Wec.lapDecoder Fixture.csv of
+                        Ok decoded_ ->
+                            decoded_
+
+                        Err _ ->
+                            []
+                )
+                "jsonDecoded"
+                -- 799 runs/s (GoF: 100%) ※426件のデータで実施
+                -- 62 runs/s (GoF: 99.99%)
+                (\_ ->
+                    case JD.decodeString (JD.field "laps" (JD.list Data.Wec.lapDecoder)) Fixture.json of
+                        Ok decoded_ ->
+                            decoded_
+
+                        Err _ ->
+                            []
+                )
+            ]
     ]
 
 
