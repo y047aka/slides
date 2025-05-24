@@ -7,6 +7,7 @@ import Data.Fixture as Fixture
 import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
+import Data.Wec.Preprocess.Dict
 import Dict
 import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
 import Html.Styled as Html exposing (br, h1, img, span, text)
@@ -45,6 +46,7 @@ slides =
     , listToArray_3
     , listToArray_4
     , optimization2
+    , optimization2_1
     , optimization3
     , optimization3_1
     , optimization3_2
@@ -397,35 +399,61 @@ TODO: 測定結果の分析を表示
 
 optimization2 : List Content
 optimization2 =
-    [ markdownPage """
-# 最適化の試み②：本当のボトルネックを探る
+    [ markdownPage "# 最適化の試み②：AssocList を Dict に置き換える"
+    , Custom.benchmark <|
+        Benchmark.describe "Data.Wec.Preprocess"
+            [ Benchmark.scale "ordersByLap_list"
+                ([ 5 -- 1,290,015 runs/s (GoF: 99.97%)
+                 , 50 -- 71,653 runs/s (GoF: 99.98%)
+                 , 500 -- 625 runs/s (GoF: 99.99%)
 
-- プロファイリングによるボトルネック特定
-- 改善策の検討と実装（遅延評価パターンの適用など）
-- 改善前後の比較
+                 --  , 5000 -- 46 runs/s (GoF: 99.97%)
+                 ]
+                    |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.ordersByLap_list target ))
+                )
+            , Benchmark.scale "ordersByLap_dict"
+                ([ 5 -- 945,315 runs/s (GoF: 99.99%)
+                 , 50 -- 64,006 runs/s (GoF: 99.98%)
+                 , 500 -- 5,279 runs/s (GoF: 99.99%)
 
-```elm
-import Csv.Decode as Decode
-import Csv
+                 --  , 5000 -- 541 runs/s (GoF: 99.99%)
+                 ]
+                    |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
+                    |> List.map (\( size, target ) -> ( toString size, \_ -> Data.Wec.Preprocess.Dict.ordersByLap_dict target ))
+                )
+            ]
+    ]
 
--- 文字列分割とパースが最大のボトルネック
 
-csvDecoder : Decode.Decoder CsvData
-csvDecoder =
-    Decode.map3 CsvData
-        (Decode.field "id" Decode.int)
-        (Decode.field "name" Decode.string)
-        (Decode.field "value" Decode.float)
+optimization2_1 : List Content
+optimization2_1 =
+    [ markdownPage "# 最適化の試み②：AssocList を Dict に置き換える"
+    , Custom.benchmark <|
+        Benchmark.describe "Data.Wec.Preprocess"
+            [ let
+                options_beginning =
+                    { carNumber = "15"
+                    , laps = Fixture.csvDecodedForCarNumber "15"
+                    , startPositions = Beginning.startPositions_list Fixture.csvDecoded
+                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
+                    }
 
-processCsvData : String -> Result Decode.Error (List CsvData)
-processCsvData csv =
-    Decode.decodeCsv Decode.FieldNamesFromFirstRow csvDecoder csv
-
--- 処理速度: 手動実装 vs csvデコーダー
--- 手動実装: 1.8 seconds
--- csvデコーダー: 0.9 seconds (50%改善)
-```
-"""
+                options_dict =
+                    { carNumber = "15"
+                    , laps = Fixture.csvDecodedForCarNumber "15"
+                    , startPositions = Data.Wec.Preprocess.Dict.startPositions_list Fixture.csvDecoded
+                    , ordersByLap = Data.Wec.Preprocess.Dict.ordersByLap_dict Fixture.csvDecoded
+                    }
+              in
+              Benchmark.compare "preprocess_"
+                "old"
+                -- 349 runs/s (GoF: 99.99%)
+                (\_ -> Beginning.preprocess_ options_beginning)
+                "improved"
+                -- 2,215 runs/s (GoF: 99.95%)
+                (\_ -> Data.Wec.Preprocess.Dict.preprocess_ options_dict)
+            ]
     ]
 
 
