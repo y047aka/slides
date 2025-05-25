@@ -11,7 +11,6 @@ import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
-import Dict
 import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
 import Html.Styled as Html exposing (br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
@@ -37,25 +36,25 @@ slides =
     [ cover
     , introduction
     , motivation
-    , elmBenchmark_1
-    , elmBenchmark_2
-    , elmBenchmark_3
+    , elmBenchmark_overview
+    , elmBenchmark_example
+    , elmBenchmark_benchmark
     , sampleData
-    , exampleCode
-    , benchmark_1
-    , optimizationIdeas
-    , listToArray_1
-    , listLengthVsArrayLength
-    , listToArray_2
-    , listToArray_3
-    , listToArray_4
-    , optimization2
-    , optimization2_1
-    , optimization3
-    , optimization3_1
-    , optimization3_2
-    , optimization4
-    , optimization4_1
+    , oldCode_workflow
+    , oldCode_benchmark
+    , optimization_ideas
+    , replaceWithArray_overview
+    , replaceWithArray_study
+    , replaceWithArray_code
+    , replaceWithArray_benchmark
+    , replaceWithArray_result
+    , replaceWithDict_ordersByLap_benchmark
+    , replaceWithDict_preprocess_benchmark
+    , improve_logic_laps_benchmark
+    , improve_logic_preprocess_benchmark
+    , improve_logic_benchmark
+    , replaceWithJson_overview
+    , replaceWithJson_benchmark
     , lessonsLearned
     , realWorldApplications
     , conclusion
@@ -95,7 +94,7 @@ cover =
         , spacer 20
         , text "関数型まつり2025"
         , spacer 10
-        , text "2025-06-15"
+        , text "2025-06-14"
         ]
     ]
 
@@ -121,34 +120,40 @@ motivation =
 # パフォーマンス計測の動機
 
 - 好奇心
-    - 一度くらい elm-benchmark を使ってみたい
-    - `List` と `Array` のパフォーマンスの違いを知りたい
-- 非効率なコードが残っているうちに試したい
-    - 改善の幅が大きいほうが楽しい
+    - ベンチマークを測定してみたい
+        - `List` と `Array` のパフォーマンスの違いを体感したい
+    - 非効率なコードが残っているうちに試したい
+        - 改善の幅が大きいほうが楽しい
+    - 性能向上を主目的としていない点にご留意ください
 """
     ]
 
 
-elmBenchmark_1 : List Content
-elmBenchmark_1 =
+elmBenchmark_overview : List Content
+elmBenchmark_overview =
     [ markdownPage """
-# elm-benchmark
+# elm-explorations/benchmark
 
-- Elmコードの性能測定ツール
-    - JITコンパイル最適化を考慮したウォームアップ処理
-        - JavaScriptエンジンの挙動を理解した正確な測定
-    - 統計的に有意な結果を得るための反復実行機能
-    - わかりやすい視覚的出力（グラフ表示）
+Elmコードのベンチマークを実行するためのパッケージ
+
+- Warming JIT：測定前にJITコンパイルを強制する
+- Collecting Samples：統計的に有意な結果を得るまで反復実行
+    - 複数対象を交互に実行し、測定の偏りを軽減する
+- Goodness of Fit：測定結果の信頼性を評価する指標
+  - （99%: 優秀 / 95%: 良好 / 90%: 要注意 / 80%以下: 信頼性低）
 """
     ]
 
 
-elmBenchmark_2 : List Content
-elmBenchmark_2 =
+elmBenchmark_example : List Content
+elmBenchmark_example =
     [ markdownPage """
-# elm-benchmark
+# elm-explorations/benchmark
 
 ```elm
+import Array
+import Benchmark exposing (..)
+
 suite : Benchmark
 suite =
     let
@@ -168,18 +173,20 @@ suite =
     ]
 
 
-elmBenchmark_3 : List Content
-elmBenchmark_3 =
-    [ markdownPage "# elm-benchmark"
+elmBenchmark_benchmark : List Content
+elmBenchmark_benchmark =
+    [ markdownPage "# elm-explorations/benchmark"
     , Custom.benchmark <|
         let
-            dest =
-                Dict.singleton "a" 1
+            sampleArray =
+                Array.initialize 100 identity
         in
-        Benchmark.describe "sample"
-            [ Benchmark.describe "dictionary"
-                [ Benchmark.benchmark "get" (\_ -> Dict.get "a" dest)
-                , Benchmark.benchmark "insert" (\_ -> Dict.insert "b" 2 dest)
+        Benchmark.describe "Array"
+            [ Benchmark.describe "slice"
+                [ Benchmark.benchmark "from the beginning" <|
+                    \_ -> Array.slice 50 100 sampleArray
+                , Benchmark.benchmark "from the end" <|
+                    \_ -> Array.slice 0 50 sampleArray
                 ]
             ]
     ]
@@ -212,32 +219,27 @@ NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LI
     ]
 
 
-exampleCode : List Content
-exampleCode =
+oldCode_workflow : List Content
+oldCode_workflow =
     [ markdownPage """
 # 最初の実装
 
-```elm
-{-| CSVをパースし、周回データとしてデコードする -}
-csvDecoded : List Wec.Lap
-csvDecoded =
-    csv
-        |> Csv.Decode.decodeCustom { fieldSeparator = ';' } FieldNamesFromFirstRow lapDecoder
-        |> Result.withDefault []
+- CSVをパースし、周回データとしてデコード
+- 周回データを解析し、車両単位で再構成
 
-{-| 周回データを車両単位で前処理する -}
-preprocess : List Wec.Lap -> List Car
+```elm
+preprocess : List Lap -> List Car
 preprocess laps =
     laps
         |> AssocList.Extra.groupBy .carNumber
         |> AssocList.toList
         |> List.map
             (\\( carNumber, laps_ ) ->
-                preprocess_deprecated
+                preprocess_old
                     { carNumber = carNumber
-                    , laps = laps_
-                    , startPositions = startPositions
-                    , ordersByLap = ordersByLap
+                    , laps = ...
+                    , startPositions = ...
+                    , ordersByLap = ...
                     }
             )
 ```
@@ -245,8 +247,8 @@ preprocess laps =
     ]
 
 
-benchmark_1 : List Content
-benchmark_1 =
+oldCode_benchmark : List Content
+oldCode_benchmark =
     [ markdownPage "# 最初の計測"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
@@ -277,36 +279,47 @@ benchmark_1 =
     ]
 
 
-optimizationIdeas : List Content
-optimizationIdeas =
+optimization_ideas : List Content
+optimization_ideas =
     [ markdownPage """
-# 最適化のアイデア
+# パフォーマンス向上のアイデア
 
 - `List` を `Array` に置き換える
-    - 1万行以上のデータを扱うので効果を期待できるかもしれない？
+    - 1万行以上のデータを扱うので、Arrayの優位性を体感できそう
 - `AssocList` を `Dict` に置き換える
+- 計算ロジックの見直し
 - CSVのデコードパッケージを自作する
-    - デコード結果を `Array` で受け取ることができれば早くなるのでは？
+    - `Array` を前提とした実装に変更すれば速くなるかな？
 """
     ]
 
 
-listToArray_1 : List Content
-listToArray_1 =
+replaceWithArray_overview : List Content
+replaceWithArray_overview =
     [ markdownPage """
-# 最適化①：`List` を `Array` に置き換える
+# 最適化① `List` を `Array` に置き換える
 
-- 測定結果から判明した問題点: 大量データのリスト処理が遅い
 - Listは線形検索、Arrayはインデックスアクセスに強い
-- 1万行以上のCSVデータには特に効果的な可能性
+- 1万行以上のデータを扱うので、Arrayの優位性を体感できそう
+
+```
+{-| スタート時の各車両の順位を求める関数
+    暫定的に1周目の通過タイムの早かった順で代用している
+-}
+startPositions : List Lap -> List String
+startPositions laps =
+    List.filter (\\{ lapNumber } -> lapNumber == 1) laps
+        |> List.sortBy .elapsed
+        |> List.map .carNumber
+```
 """
     ]
 
 
 {-| <https://github.com/y047aka/elm-motorsport-analysis/pull/4/commits/98e10ec08c46a0aa6549fe01bbf41d9125387dbc>
 -}
-listLengthVsArrayLength : List Content
-listLengthVsArrayLength =
+replaceWithArray_study : List Content
+replaceWithArray_study =
     [ Custom.benchmark <|
         Benchmark.describe "length" <|
             [ Benchmark.scale "List.length"
@@ -345,21 +358,31 @@ toString n =
     "n = " ++ String.fromInt n
 
 
-listToArray_2 : List Content
-listToArray_2 =
+replaceWithArray_code : List Content
+replaceWithArray_code =
     [ markdownPage """
-# 最適化①：`List` を `Array` に置き換える
+# 最適化① `List` を `Array` に置き換える
 
-TODO: 改善後のコードを表示
+```
+{-| スタート時の各車両の順位を求める関数
+    暫定的に1周目の通過タイムの早かった順で代用している
+-}
+startPositions : Array Wec.Lap -> List String
+startPositions laps =
+    Array.filter (\\{ lapNumber } -> lapNumber == 1) laps
+        |> Array.toList
+        |> List.sortBy .elapsed
+        |> List.map .carNumber
+```
 """
     ]
 
 
 {-| <https://github.com/y047aka/elm-motorsport-analysis/pull/4/commits/fc830456108acf98ebb9a9ed65e81032d0b85637>
 -}
-listToArray_3 : List Content
-listToArray_3 =
-    [ markdownPage "# 計測①：`List` を `Array` に置き換える"
+replaceWithArray_benchmark : List Content
+replaceWithArray_benchmark =
+    [ markdownPage "# 最適化① `List` を `Array` に置き換える"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ Benchmark.scale "startPositions_list"
@@ -392,19 +415,24 @@ startPositions_array laps =
         |> List.map .carNumber
 
 
-listToArray_4 : List Content
-listToArray_4 =
+replaceWithArray_result : List Content
+replaceWithArray_result =
     [ markdownPage """
-# 最適化①：`List` を `Array` に置き換える
+# 最適化① `List` を `Array` に置き換える
 
-TODO: 測定結果の分析を表示
+- 困ったこと
+    - Arrayを操作する関数があまり提供されていない
+        - そのため、ArrayをListに変換する処理を挟むことになる
+        - その場合にも若干のパフォーマンス向上はあるけど...
+- 解決策
+    - Arrayを操作する関数を自作する
 """
     ]
 
 
-optimization2 : List Content
-optimization2 =
-    [ markdownPage "# 最適化の試み②：AssocList を Dict に置き換える"
+replaceWithDict_ordersByLap_benchmark : List Content
+replaceWithDict_ordersByLap_benchmark =
+    [ markdownPage "# 最適化② AssocList を Dict に置き換える"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ Benchmark.scale "ordersByLap_list"
@@ -431,9 +459,9 @@ optimization2 =
     ]
 
 
-optimization2_1 : List Content
-optimization2_1 =
-    [ markdownPage "# 最適化の試み②：AssocList を Dict に置き換える"
+replaceWithDict_preprocess_benchmark : List Content
+replaceWithDict_preprocess_benchmark =
+    [ markdownPage "# 最適化② AssocList を Dict に置き換える"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ let
@@ -462,8 +490,8 @@ optimization2_1 =
     ]
 
 
-optimization3 : List Content
-optimization3 =
+improve_logic_laps_benchmark : List Content
+improve_logic_laps_benchmark =
     [ markdownPage "# 最適化の試み③：計算ロジックを改良する"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
@@ -485,8 +513,8 @@ optimization3 =
     ]
 
 
-optimization3_1 : List Content
-optimization3_1 =
+improve_logic_preprocess_benchmark : List Content
+improve_logic_preprocess_benchmark =
     [ markdownPage "# 最適化の試み③：計算ロジックを改良する"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
@@ -509,8 +537,8 @@ optimization3_1 =
     ]
 
 
-optimization3_2 : List Content
-optimization3_2 =
+improve_logic_benchmark : List Content
+improve_logic_benchmark =
     [ markdownPage "# 最適化の試み③：計算ロジックを改良する"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess.preprocess"
@@ -538,8 +566,8 @@ optimization3_2 =
     ]
 
 
-optimization4 : List Content
-optimization4 =
+replaceWithJson_overview : List Content
+replaceWithJson_overview =
     [ markdownPage """
 # 最適化の試み④：入力データ形式の変更
 
@@ -569,8 +597,8 @@ processJsonData json =
     ]
 
 
-optimization4_1 : List Content
-optimization4_1 =
+replaceWithJson_benchmark : List Content
+replaceWithJson_benchmark =
     [ markdownPage "# 最適化の試み④：入力データ形式の変更"
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
