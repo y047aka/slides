@@ -11,7 +11,7 @@ import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
-import Formatting.Styled as Formatting exposing (background, colored, markdown, markdownPage, spacer)
+import Formatting.Styled as Formatting exposing (background, colored, highlightCode, highlightElm, markdown, markdownPage, spacer)
 import Html.Styled as Html exposing (br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
@@ -147,11 +147,8 @@ Elmコードのベンチマークを実行するためのパッケージ
 
 elmBenchmark_example : List Content
 elmBenchmark_example =
-    [ markdownPage """
-# elm-explorations/benchmark
-
-```elm
-import Array
+    [ markdownPage "# elm-explorations/benchmark"
+    , highlightElm """import Array
 import Benchmark exposing (..)
 
 suite : Benchmark
@@ -167,9 +164,7 @@ suite =
             , benchmark "from the end" <|
                 \\_ -> Array.slice 0 50 sampleArray
             ]
-        ]
-```
-"""
+        ]"""
     ]
 
 
@@ -198,9 +193,8 @@ sampleData =
 # 検証用サンプルデータ
 
 - ル・マン24時間レース（2024年）の全車両の走行データ
-
-```csv
-NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LINE_IN_PIT; S1; S1_IMPROVEMENT; S2; S2_IMPROVEMENT; S3; S3_IMPROVEMENT; KPH; ELAPSED; HOUR;S1_LARGE;S2_LARGE;S3_LARGE;TOP_SPEED;DRIVER_NAME;PIT_TIME;CLASS;GROUP;TEAM;MANUFACTURER;FLAG_AT_FL;S1_SECONDS;S2_SECONDS;S3_SECONDS;
+"""
+    , highlightCode """NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LINE_IN_PIT; S1; S1_IMPROVEMENT; S2; S2_IMPROVEMENT; S3; S3_IMPROVEMENT; KPH; ELAPSED; HOUR;S1_LARGE;S2_LARGE;S3_LARGE;TOP_SPEED;DRIVER_NAME;PIT_TIME;CLASS;GROUP;TEAM;MANUFACTURER;FLAG_AT_FL;S1_SECONDS;S2_SECONDS;S3_SECONDS;
 10;2;1;3:53.276;0;;45.985;0;1:26.214;0;1:41.077;0;208.1;3:53.276;16:04:19.878;0:45.985;1:26.214;1:41.077;316.3;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;45.985;86.214;101.077;
 10;2;2;3:39.529;0;;34.734;0;1:24.901;0;1:39.894;0;223.4;7:32.805;16:07:59.407;0:34.734;1:24.901;1:39.894;315.4;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.734;84.901;99.894;
 10;2;3;3:39.240;2;;34.715;0;1:24.814;0;1:39.711;0;223.7;11:12.045;16:11:38.647;0:34.715;1:24.814;1:39.711;313.6;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.715;84.814;99.711;
@@ -213,9 +207,7 @@ NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LI
 10;2;10;4:58.334;0;;1:51.808;0;1:25.765;0;1:40.761;0;164.4;38:17.495;16:38:44.097;1:51.808;1:25.765;1:40.761;309.1;Patrick PILET;0:01:27.261;LMP2;;Vector Sport;Oreca;GF;111.808;85.765;100.761;
 10;2;11;3:43.277;0;;36.637;0;1:25.990;0;1:40.650;0;219.7;42:00.772;16:42:27.374;0:36.637;1:25.990;1:40.650;310.9;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;36.637;85.990;100.650;
 …
-99;2;251;4:07.503;0;;40.250;0;1:31.114;0;1:56.139;0;198.2;24:05:35.985;16:06:02.587;0:40.250;1:31.114;1:56.139;242.0;Harry TINCKNELL;;HYPERCAR;H;Proton Competition;Porsche;FF;40.250;91.114;116.139;
-```
-"""
+99;2;251;4:07.503;0;;40.250;0;1:31.114;0;1:56.139;0;198.2;24:05:35.985;16:06:02.587;0:40.250;1:31.114;1:56.139;242.0;Harry TINCKNELL;;HYPERCAR;H;Proton Competition;Porsche;FF;40.250;91.114;116.139;"""
     ]
 
 
@@ -226,9 +218,8 @@ oldCode_workflow =
 
 - CSVをパースし、周回データとしてデコード
 - 周回データを解析し、車両単位で再構成
-
-```elm
-preprocess : List Lap -> List Car
+"""
+    , highlightElm """preprocess : List Lap -> List Car
 preprocess laps =
     laps
         |> AssocList.Extra.groupBy .carNumber
@@ -241,9 +232,7 @@ preprocess laps =
                     , startPositions = ...
                     , ordersByLap = ...
                     }
-            )
-```
-"""
+            )"""
     ]
 
 
@@ -301,18 +290,15 @@ replaceWithArray_overview =
 
 - Listは線形検索、Arrayはインデックスアクセスに強い
 - 1万行以上のデータを扱うので、Arrayの優位性を体感できそう
-
-```
-{-| スタート時の各車両の順位を求める関数
+"""
+    , highlightElm """{-| スタート時の各車両の順位を求める関数
     暫定的に1周目の通過タイムの早かった順で代用している
 -}
 startPositions : List Lap -> List String
 startPositions laps =
     List.filter (\\{ lapNumber } -> lapNumber == 1) laps
         |> List.sortBy .elapsed
-        |> List.map .carNumber
-```
-"""
+        |> List.map .carNumber"""
     ]
 
 
@@ -360,11 +346,8 @@ toString n =
 
 replaceWithArray_code : List Content
 replaceWithArray_code =
-    [ markdownPage """
-# 最適化① `List` を `Array` に置き換える
-
-```
-{-| スタート時の各車両の順位を求める関数
+    [ markdownPage "# 最適化① `List` を `Array` に置き換える"
+    , highlightElm """{-| スタート時の各車両の順位を求める関数
     暫定的に1周目の通過タイムの早かった順で代用している
 -}
 startPositions : Array Wec.Lap -> List String
@@ -372,9 +355,7 @@ startPositions laps =
     Array.filter (\\{ lapNumber } -> lapNumber == 1) laps
         |> Array.toList
         |> List.sortBy .elapsed
-        |> List.map .carNumber
-```
-"""
+        |> List.map .carNumber"""
     ]
 
 
@@ -574,9 +555,8 @@ replaceWithJson_overview =
 - CSVとJSONの処理特性の違い
 - JSONデコードに変更した実装
 - パフォーマンスへの影響
-
-```elm
-import Json.Decode as Decode
+"""
+    , highlightElm """import Json.Decode as Decode
 
 jsonDecoder : Decode.Decoder CsvData
 jsonDecoder =
@@ -591,9 +571,7 @@ processJsonData json =
 
 -- 処理速度: CSV vs JSON
 -- CSV: 0.9 seconds
--- JSON: 0.4 seconds (55%改善)
-```
-"""
+-- JSON: 0.4 seconds (55%改善)"""
     ]
 
 
@@ -638,9 +616,8 @@ lessonsLearned =
 - 専用デコーダーの重要性
 - データ量とパフォーマンスの関係性
 - Elm特有の最適化ポイント
-
-```
--- 最初の実装と最終実装の比較
+"""
+    , highlightCode """-- 最初の実装と最終実装の比較
 -- 処理速度: 初期実装 vs 最適化後
 -- 初期実装: 2.4 seconds
 -- 最適化後: 0.4 seconds (83%改善)
@@ -648,9 +625,7 @@ lessonsLearned =
 主な改善ポイント:
 1. 専用デコーダーの利用
 2. 適切なデータ構造の選択
-3. 入力データ形式の最適化
-```
-"""
+3. 入力データ形式の最適化"""
     ]
 
 
@@ -662,18 +637,15 @@ realWorldApplications =
 - データ処理と DOM操作の違い
 - The Elm Architectureでのパフォーマンス考慮点
 - 実務での優先順位の決め方
-
-```elm
--- パフォーマンス問題の主な種類:
+"""
+    , highlightElm """-- パフォーマンス問題の主な種類:
 1. 初期化時間の遅さ (大量データの初期ロード)
 2. 更新処理の遅さ (Updateサイクルの最適化)
 3. 描画の遅さ (DOM操作の最小化)
 
 -- The Elm Architectureでの最適化
 -- Html.Lazy, Html.Keyed の活用
--- モデル設計の見直し
-```
-"""
+-- モデル設計の見直し"""
     ]
 
 

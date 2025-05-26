@@ -1,13 +1,14 @@
-module Formatting.Styled exposing (background, col, color, colored, image, markdown, markdownPage, noPointerEvents, padded, position, row, spacer, title)
+module Formatting.Styled exposing (background, col, color, colored, highlightCode, highlightElm, image, markdown, markdownPage, noPointerEvents, padded, position, row, spacer, title)
 
 import Css exposing (..)
-import Html.Styled as Html exposing (Html, a, div, h1, img, text)
+import Html.Styled as Html exposing (Html, a, code, div, h1, img, text)
 import Html.Styled.Attributes as Attributes exposing (css, href, rel, src)
 import Markdown.Block as Block
 import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer exposing (Renderer)
-import SliceShow.Content exposing (Content, container, item)
+import SliceShow.Content exposing (Content, item)
+import SyntaxHighlight exposing (elm, monokai, noLang, toBlockHtml, useTheme)
 
 
 slidePadding : Css.Style
@@ -337,3 +338,31 @@ customizedHtmlRenderer =
             in
             Html.td attrs
     }
+
+
+{-| Elmコードのシンタックスハイライト表示用ヘルパー関数
+-}
+highlightElm : String -> Content model msg
+highlightElm code =
+    item <|
+        Html.toUnstyled <|
+            case elm code of
+                Ok highlighted ->
+                    Html.fromUnstyled (toBlockHtml (Just 1) highlighted)
+
+                Err _ ->
+                    Html.pre [] [ Html.code [] [ text code ] ]
+
+
+{-| 汎用コードのシンタックスハイライト表示用ヘルパー関数
+-}
+highlightCode : String -> Content model msg
+highlightCode code =
+    item <|
+        Html.toUnstyled <|
+            case noLang code of
+                Ok highlighted ->
+                    Html.fromUnstyled (toBlockHtml (Just 1) highlighted)
+
+                Err _ ->
+                    Html.pre [] [ Html.code [] [ text code ] ]
