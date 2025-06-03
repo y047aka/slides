@@ -11,7 +11,7 @@ import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
-import Formatting.Styled as Formatting exposing (background, colored, highlightCode, highlightElm, markdown, markdownPage, spacer)
+import Formatting.Styled as Formatting exposing (background, colored, highlightCode, highlightElm, markdown, markdownPage, pageHeader, spacer)
 import Html.Styled as Html exposing (br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
@@ -34,29 +34,49 @@ main =
 slides : List (List Content)
 slides =
     [ cover
+
+    -- はじめに
     , introduction
     , motivation
+
+    -- elm-explorations/benchmark
     , elmBenchmark_overview
     , elmBenchmark_example
     , elmBenchmark_benchmark
     , sampleData
+
+    -- 最初の実装
     , oldCode_workflow
     , oldCode_benchmark
+
+    -- 検証用サンプルデータ
     , optimization_ideas
+
+    -- 最適化① List を Array に置き換える
     , replaceWithArray_overview
     , replaceWithArray_study
     , replaceWithArray_code
     , replaceWithArray_benchmark
     , replaceWithArray_result
+
+    -- 最適化② AssocList を Dict に置き換える
     , replaceWithDict_ordersByLap_benchmark
     , replaceWithDict_preprocess_benchmark
+
+    -- 最適化の試み③：計算ロジックを改良する
     , improve_logic_laps_benchmark
     , improve_logic_preprocess_benchmark
     , improve_logic_benchmark
+
+    -- 最適化の試み④：入力データ形式の変更
     , replaceWithJson_overview
     , replaceWithJson_benchmark
+
+    -- ベンチマークから得られた知見
     , lessonsLearned
     , realWorldApplications
+
+    -- まとめ
     , conclusion
     ]
 
@@ -101,9 +121,11 @@ cover =
 
 introduction : List Content
 introduction =
-    [ markdownPage """
-# はじめに
-
+    [ pageHeader
+        { chapter = "はじめに"
+        , title = "Elmの特徴とパフォーマンスの疑問"
+        }
+    , markdownPage """
 - Elmの紹介と特徴
 - パフォーマンスに関する一般的な認識と疑問
 - Elmは遅いのか？速いのか？
@@ -116,9 +138,11 @@ introduction =
 
 motivation : List Content
 motivation =
-    [ markdownPage """
-# パフォーマンス計測の動機
-
+    [ pageHeader
+        { chapter = "はじめに"
+        , title = "パフォーマンス計測の動機"
+        }
+    , markdownPage """
 - 好奇心
     - ベンチマークを測定してみたい
         - `List` と `Array` のパフォーマンスの違いを体感したい
@@ -131,11 +155,11 @@ motivation =
 
 elmBenchmark_overview : List Content
 elmBenchmark_overview =
-    [ markdownPage """
-# elm-explorations/benchmark
-
-Elmコードのベンチマークを実行するためのパッケージ
-
+    [ pageHeader
+        { chapter = "elm-explorations/benchmark"
+        , title = "Elmコードのベンチマークを実行するためのパッケージ"
+        }
+    , markdownPage """
 - Warming JIT：測定前にJITコンパイルを強制する
 - Collecting Samples：統計的に有意な結果を得るまで反復実行
     - 複数対象を交互に実行し、測定の偏りを軽減する
@@ -147,7 +171,10 @@ Elmコードのベンチマークを実行するためのパッケージ
 
 elmBenchmark_example : List Content
 elmBenchmark_example =
-    [ markdownPage "# elm-explorations/benchmark"
+    [ pageHeader
+        { chapter = "elm-explorations/benchmark"
+        , title = "使用例"
+        }
     , highlightElm """import Array
 import Benchmark exposing (..)
 
@@ -170,7 +197,10 @@ suite =
 
 elmBenchmark_benchmark : List Content
 elmBenchmark_benchmark =
-    [ markdownPage "# elm-explorations/benchmark"
+    [ pageHeader
+        { chapter = "elm-explorations/benchmark"
+        , title = "実行"
+        }
     , Custom.benchmark <|
         let
             sampleArray =
@@ -189,11 +219,10 @@ elmBenchmark_benchmark =
 
 sampleData : List Content
 sampleData =
-    [ markdownPage """
-# 検証用サンプルデータ
-
-- ル・マン24時間レース（2024年）の全車両の走行データ
-"""
+    [ pageHeader
+        { chapter = "検証用サンプルデータ"
+        , title = "ル・マン24時間レース（2024年）の走行データ"
+        }
     , highlightCode """NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LINE_IN_PIT; S1; S1_IMPROVEMENT; S2; S2_IMPROVEMENT; S3; S3_IMPROVEMENT; KPH; ELAPSED; HOUR;S1_LARGE;S2_LARGE;S3_LARGE;TOP_SPEED;DRIVER_NAME;PIT_TIME;CLASS;GROUP;TEAM;MANUFACTURER;FLAG_AT_FL;S1_SECONDS;S2_SECONDS;S3_SECONDS;
 10;2;1;3:53.276;0;;45.985;0;1:26.214;0;1:41.077;0;208.1;3:53.276;16:04:19.878;0:45.985;1:26.214;1:41.077;316.3;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;45.985;86.214;101.077;
 10;2;2;3:39.529;0;;34.734;0;1:24.901;0;1:39.894;0;223.4;7:32.805;16:07:59.407;0:34.734;1:24.901;1:39.894;315.4;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.734;84.901;99.894;
@@ -213,10 +242,11 @@ sampleData =
 
 oldCode_workflow : List Content
 oldCode_workflow =
-    [ markdownPage """
-# 最初の実装
-
-- CSVをパースし、周回データとしてデコード
+    [ pageHeader
+        { chapter = "最初の実装"
+        , title = "CSVをパースし、周回データとしてデコード"
+        }
+    , markdownPage """
 - 周回データを解析し、車両単位で再構成
 """
     , highlightElm """preprocess : List Lap -> List Car
@@ -238,7 +268,10 @@ preprocess laps =
 
 oldCode_benchmark : List Content
 oldCode_benchmark =
-    [ markdownPage "# 最初の計測"
+    [ pageHeader
+        { chapter = "最初の実装"
+        , title = "ベンチマーク"
+        }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ Benchmark.scale "old"
@@ -270,9 +303,11 @@ oldCode_benchmark =
 
 optimization_ideas : List Content
 optimization_ideas =
-    [ markdownPage """
-# パフォーマンス向上のアイデア
-
+    [ pageHeader
+        { chapter = "パフォーマンス改善の計画"
+        , title = "パフォーマンス改善のアイデア"
+        }
+    , markdownPage """
 - `List` を `Array` に置き換える
     - 1万行以上のデータを扱うので、Arrayの優位性を体感できそう
 - `AssocList` を `Dict` に置き換える
@@ -285,9 +320,11 @@ optimization_ideas =
 
 replaceWithArray_overview : List Content
 replaceWithArray_overview =
-    [ markdownPage """
-# 最適化① `List` を `Array` に置き換える
-
+    [ pageHeader
+        { chapter = "最適化①"
+        , title = "List を Array に置き換える"
+        }
+    , markdownPage """
 - Listは線形検索、Arrayはインデックスアクセスに強い
 - 1万行以上のデータを扱うので、Arrayの優位性を体感できそう
 """
@@ -306,7 +343,11 @@ startPositions laps =
 -}
 replaceWithArray_study : List Content
 replaceWithArray_study =
-    [ Custom.benchmark <|
+    [ pageHeader
+        { chapter = "最適化① List を Array に置き換える"
+        , title = "List.length と Array.length の比較"
+        }
+    , Custom.benchmark <|
         Benchmark.describe "length" <|
             [ Benchmark.scale "List.length"
                 ([ 5 -- 30,822,646 runs/s (GoF: 99.9%)
@@ -346,7 +387,10 @@ toString n =
 
 replaceWithArray_code : List Content
 replaceWithArray_code =
-    [ markdownPage "# 最適化① `List` を `Array` に置き換える"
+    [ pageHeader
+        { chapter = "最適化① List を Array に置き換える"
+        , title = "実装の変更"
+        }
     , highlightElm """{-| スタート時の各車両の順位を求める関数
     暫定的に1周目の通過タイムの早かった順で代用している
 -}
@@ -363,7 +407,10 @@ startPositions laps =
 -}
 replaceWithArray_benchmark : List Content
 replaceWithArray_benchmark =
-    [ markdownPage "# 最適化① `List` を `Array` に置き換える"
+    [ pageHeader
+        { chapter = "最適化① List を Array に置き換える"
+        , title = "ベンチマーク"
+        }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ Benchmark.scale "startPositions_list"
@@ -398,9 +445,11 @@ startPositions_array laps =
 
 replaceWithArray_result : List Content
 replaceWithArray_result =
-    [ markdownPage """
-# 最適化① `List` を `Array` に置き換える
-
+    [ pageHeader
+        { chapter = "最適化① List を Array に置き換える"
+        , title = "結果"
+        }
+    , markdownPage """
 - 困ったこと
     - Arrayを操作する関数があまり提供されていない
         - そのため、ArrayをListに変換する処理を挟むことになる
@@ -413,7 +462,10 @@ replaceWithArray_result =
 
 replaceWithDict_ordersByLap_benchmark : List Content
 replaceWithDict_ordersByLap_benchmark =
-    [ markdownPage "# 最適化② AssocList を Dict に置き換える"
+    [ pageHeader
+        { chapter = "最適化② AssocList を Dict に置き換える"
+        , title = "ベンチマーク：ordersByLap"
+        }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ Benchmark.scale "ordersByLap_list"
@@ -442,7 +494,10 @@ replaceWithDict_ordersByLap_benchmark =
 
 replaceWithDict_preprocess_benchmark : List Content
 replaceWithDict_preprocess_benchmark =
-    [ markdownPage "# 最適化② AssocList を Dict に置き換える"
+    [ pageHeader
+        { chapter = "最適化② AssocList を Dict に置き換える"
+        , title = "ベンチマーク：preprocess_"
+        }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ let
@@ -473,7 +528,10 @@ replaceWithDict_preprocess_benchmark =
 
 improve_logic_laps_benchmark : List Content
 improve_logic_laps_benchmark =
-    [ markdownPage "# 最適化の試み③：計算ロジックを改良する"
+    [ pageHeader
+        { chapter = "最適化の試み③：計算ロジックを改良する"
+        , title = "ベンチマーク：laps_"
+        }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ let
@@ -496,7 +554,10 @@ improve_logic_laps_benchmark =
 
 improve_logic_preprocess_benchmark : List Content
 improve_logic_preprocess_benchmark =
-    [ markdownPage "# 最適化の試み③：計算ロジックを改良する"
+    [ pageHeader
+        { chapter = "最適化の試み③：計算ロジックを改良する"
+        , title = "ベンチマーク：preprocess_"
+        }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ let
@@ -520,7 +581,10 @@ improve_logic_preprocess_benchmark =
 
 improve_logic_benchmark : List Content
 improve_logic_benchmark =
-    [ markdownPage "# 最適化の試み③：計算ロジックを改良する"
+    [ pageHeader
+        { chapter = "最適化の試み③：計算ロジックを改良する"
+        , title = "ベンチマーク：preprocess"
+        }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess.preprocess"
             [ Benchmark.scale "old"
@@ -549,9 +613,11 @@ improve_logic_benchmark =
 
 replaceWithJson_overview : List Content
 replaceWithJson_overview =
-    [ markdownPage """
-# 最適化の試み④：入力データ形式の変更
-
+    [ pageHeader
+        { chapter = "最適化の試み④：入力データ形式の変更"
+        , title = "CSVからJSONへの移行"
+        }
+    , markdownPage """
 - CSVとJSONの処理特性の違い
 - JSONデコードに変更した実装
 - パフォーマンスへの影響
@@ -577,7 +643,10 @@ processJsonData json =
 
 replaceWithJson_benchmark : List Content
 replaceWithJson_benchmark =
-    [ markdownPage "# 最適化の試み④：入力データ形式の変更"
+    [ pageHeader
+        { chapter = "最適化の試み④：入力データ形式の変更"
+        , title = "ベンチマーク：xxxDecoded"
+        }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
             [ Benchmark.compare "xxxDecoded"
@@ -609,9 +678,11 @@ replaceWithJson_benchmark =
 
 lessonsLearned : List Content
 lessonsLearned =
-    [ markdownPage """
-# ベンチマークから得られた知見
-
+    [ pageHeader
+        { chapter = "ベンチマークから得られた知見"
+        , title = "データ構造とパフォーマンスの関係"
+        }
+    , markdownPage """
 - データ構造選択の影響度（List vs Array）
 - 専用デコーダーの重要性
 - データ量とパフォーマンスの関係性
@@ -631,9 +702,11 @@ lessonsLearned =
 
 realWorldApplications : List Content
 realWorldApplications =
-    [ markdownPage """
-# 実際のアプリケーションでの考慮点
-
+    [ pageHeader
+        { chapter = "ベンチマークから得られた知見"
+        , title = "実務でのパフォーマンス最適化"
+        }
+    , markdownPage """
 - データ処理と DOM操作の違い
 - The Elm Architectureでのパフォーマンス考慮点
 - 実務での優先順位の決め方

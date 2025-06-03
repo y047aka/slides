@@ -1,14 +1,15 @@
-module Formatting.Styled exposing (background, col, color, colored, highlightCode, highlightElm, image, markdown, markdownPage, noPointerEvents, padded, position, row, spacer, title)
+module Formatting.Styled exposing (background, col, color, colored, highlightCode, highlightElm, image, markdown, markdownPage, noPointerEvents, padded, pageHeader, position, row, spacer, title)
 
 import Css exposing (..)
-import Html.Styled as Html exposing (Html, a, code, div, h1, img, text)
+import Css.Global exposing (children, everything)
+import Html.Styled as Html exposing (Html, a, code, div, h1, header, img, text)
 import Html.Styled.Attributes as Attributes exposing (css, href, rel, src)
 import Markdown.Block as Block
 import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer exposing (Renderer)
 import SliceShow.Content exposing (Content, item)
-import SyntaxHighlight exposing (elm, monokai, noLang, toBlockHtml, useTheme)
+import SyntaxHighlight exposing (elm, noLang, toBlockHtml)
 
 
 slidePadding : Css.Style
@@ -75,6 +76,35 @@ title txt =
     h1 [] [ text txt ]
 
 
+type alias PageHeader =
+    { chapter : String
+    , title : String
+    }
+
+
+pageHeader : PageHeader -> Content model msg
+pageHeader props =
+    item <|
+        Html.toUnstyled <|
+            header
+                [ css
+                    [ padding (em 0.8)
+                    , displayFlex
+                    , flexDirection column
+                    , property "row-gap" "1rem"
+                    , children
+                        [ everything
+                            [ margin zero, lineHeight (num 1) ]
+                        ]
+                    ]
+                ]
+                [ div [ css [ fontSize (rem 2), fontWeight bold ] ]
+                    [ text props.chapter ]
+                , h1 [ css [ fontSize (rem 3), fontWeight normal ] ]
+                    [ text props.title ]
+                ]
+
+
 position : Int -> Int -> Html msg -> Html msg
 position left top content =
     div
@@ -132,7 +162,7 @@ markdown markdownStr =
 markdownPage : String -> Content model msg
 markdownPage markdownStr =
     markdown markdownStr
-        |> padded
+        |> div []
         |> Html.toUnstyled
         |> item
 
