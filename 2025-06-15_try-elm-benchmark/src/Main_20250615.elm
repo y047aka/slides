@@ -214,23 +214,26 @@ elmBenchmark_example =
         { chapter = "elm-explorations/benchmark"
         , title = "使用例"
         }
-    , highlightElm """import Array
-import Benchmark exposing (..)
+    , highlightElm """import Benchmark exposing (..)
 
 suite : Benchmark
 suite =
-    let
-        sampleArray =
-            Array.initialize 100 identity
-    in
-    describe "Array"
-        [ describe "slice"
-            [ benchmark "from the beginning" <|
-                \\_ -> Array.slice 50 100 sampleArray
-            , benchmark "from the end" <|
-                \\_ -> Array.slice 0 50 sampleArray
-            ]
-        ]"""
+    describe "FizzBuzz"
+        [ benchmark "fizzBuzz" <|
+            \\_ -> fizzBuzz 100
+        ]
+
+fizzBuzz : Int -> String
+fizzBuzz n =
+    case ( modBy 3 n, modBy 5 n ) of
+        ( 0, 0 ) -> "FizzBuzz"
+
+        ( 0, _ ) -> "Fizz"
+
+        ( _, 0 ) -> "Buzz"
+
+        _ -> String.fromInt n
+"""
     ]
 
 
@@ -238,22 +241,34 @@ elmBenchmark_benchmark : List Content
 elmBenchmark_benchmark =
     [ pageHeader
         { chapter = "elm-explorations/benchmark"
-        , title = "実行"
+        , title = "ベンチマーク測定の様子"
         }
     , Custom.benchmark <|
-        let
-            sampleArray =
-                Array.initialize 100 identity
-        in
-        Benchmark.describe "Array"
-            [ Benchmark.describe "slice"
+        Benchmark.describe "FizzBuzz"
+            [ Benchmark.describe "fizzBuzz"
                 [ Benchmark.benchmark "from the beginning" <|
-                    \_ -> Array.slice 50 100 sampleArray
+                    \_ -> fizzBuzz 100
                 , Benchmark.benchmark "from the end" <|
-                    \_ -> Array.slice 0 50 sampleArray
+                    \_ -> fizzBuzz 1000
                 ]
             ]
     ]
+
+
+fizzBuzz : Int -> String
+fizzBuzz n =
+    case ( modBy 3 n, modBy 5 n ) of
+        ( 0, 0 ) ->
+            "FizzBuzz"
+
+        ( 0, _ ) ->
+            "Fizz"
+
+        ( _, 0 ) ->
+            "Buzz"
+
+        _ ->
+            String.fromInt n
 
 
 sampleData : List Content
