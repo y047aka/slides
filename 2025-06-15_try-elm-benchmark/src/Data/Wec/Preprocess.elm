@@ -1,13 +1,13 @@
 module Data.Wec.Preprocess exposing
     ( preprocess
-    , preprocess_
+    , preprocessHelper
     , laps_
     )
 
 {-|
 
 @docs preprocess
-@docs preprocess_
+@docs preprocessHelper
 @docs laps_
 
 -}
@@ -35,7 +35,7 @@ preprocess laps =
         |> AssocList.toList
         |> List.map
             (\( carNumber, laps__ ) ->
-                preprocess_
+                preprocessHelper
                     { carNumber = carNumber
                     , laps = laps__
                     , startPositions = startPositions
@@ -68,14 +68,14 @@ ordersByLap_list laps =
             )
 
 
-preprocess_ :
+preprocessHelper :
     { carNumber : String
     , laps : List Wec.Lap
     , startPositions : List String
     , ordersByLap : OrdersByLap
     }
     -> Car
-preprocess_ { carNumber, laps, startPositions, ordersByLap } =
+preprocessHelper { carNumber, laps, startPositions, ordersByLap } =
     let
         { currentDriver_, class_, group_, team_, manufacturer_ } =
             List.head laps

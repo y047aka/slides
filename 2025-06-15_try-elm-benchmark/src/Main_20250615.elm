@@ -65,12 +65,12 @@ slides =
     , replaceWithDict_overview
     , replaceWithDict_comparison
     , replaceWithDict_ordersByLap_benchmark
-    , replaceWithDict_preprocess_benchmark
+    , replaceWithDict_preprocessHelper_benchmark
 
     -- 改善③：計算ロジックを改良する
     , improve_logic_overview
     , improve_logic_laps_benchmark
-    , improve_logic_preprocess_benchmark
+    , improve_logic_preprocessHelper_benchmark
     , improve_logic_benchmark
 
     -- 改善④：入力データ形式の変更
@@ -313,7 +313,7 @@ preprocess laps =
         |> AssocList.toList
         |> List.map
             (\\( carNumber, laps_ ) ->
-                preprocess_old
+                preprocessHelper_old
                     { carNumber = carNumber
                     , laps = ...
                     , startPositions = ...
@@ -349,10 +349,10 @@ oldCode_benchmark =
                     , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
                     }
               in
-              Benchmark.benchmark "preprocess_"
+              Benchmark.benchmark "preprocessHelper"
                 (\_ ->
                     -- 375 runs/s (GoF: 100%)
-                    Beginning.preprocess_ options
+                    Beginning.preprocessHelper options
                 )
             ]
     ]
@@ -586,11 +586,11 @@ replaceWithDict_ordersByLap_benchmark =
     ]
 
 
-replaceWithDict_preprocess_benchmark : List Content
-replaceWithDict_preprocess_benchmark =
+replaceWithDict_preprocessHelper_benchmark : List Content
+replaceWithDict_preprocessHelper_benchmark =
     [ pageHeader
         { chapter = "改善② AssocList を Dict に置き換える"
-        , title = "ベンチマーク：preprocess_"
+        , title = "ベンチマーク：preprocessHelper"
         }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
@@ -609,13 +609,13 @@ replaceWithDict_preprocess_benchmark =
                     , ordersByLap = Data.Wec.Preprocess.Dict.ordersByLap_dict Fixture.csvDecoded
                     }
               in
-              Benchmark.compare "preprocess_"
+              Benchmark.compare "preprocessHelper"
                 "old"
                 -- 349 runs/s (GoF: 99.99%)
-                (\_ -> Beginning.preprocess_ options_beginning)
+                (\_ -> Beginning.preprocessHelper options_beginning)
                 "improved"
                 -- 2,215 runs/s (GoF: 99.95%)
-                (\_ -> Data.Wec.Preprocess.Dict.preprocess_ options_dict)
+                (\_ -> Data.Wec.Preprocess.Dict.preprocessHelper options_dict)
             ]
     ]
 
@@ -664,11 +664,11 @@ improve_logic_laps_benchmark =
     ]
 
 
-improve_logic_preprocess_benchmark : List Content
-improve_logic_preprocess_benchmark =
+improve_logic_preprocessHelper_benchmark : List Content
+improve_logic_preprocessHelper_benchmark =
     [ pageHeader
         { chapter = "改善③：計算ロジックを改良する"
-        , title = "ベンチマーク：preprocess_"
+        , title = "ベンチマーク：preprocessHelper"
         }
     , Custom.benchmark <|
         Benchmark.describe "Data.Wec.Preprocess"
@@ -680,13 +680,13 @@ improve_logic_preprocess_benchmark =
                     , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
                     }
               in
-              Benchmark.compare "preprocess_"
+              Benchmark.compare "preprocessHelper"
                 "old"
                 -- 349 runs/s (GoF: 99.99%)
-                (\_ -> Beginning.preprocess_ options)
+                (\_ -> Beginning.preprocessHelper options)
                 "improved"
                 -- 2,215 runs/s (GoF: 99.95%)
-                (\_ -> Data.Wec.Preprocess.preprocess_ options)
+                (\_ -> Data.Wec.Preprocess.preprocessHelper options)
             ]
     ]
 

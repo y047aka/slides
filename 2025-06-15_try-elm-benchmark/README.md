@@ -46,12 +46,12 @@ Elmは型安全性や開発体験の良さが注目されがちですが、実�
 
 ### 5. 最適化の試み②：`AssocList` を `Dict` に置き換える
 - ordersByLapのベンチマーク比較
-- preprocess_のベンチマーク比較
+- preprocessHelperのベンチマーク比較
 
 
 ### 6. 最適化の試み③：計算ロジックを改良する
 - laps_のベンチマーク比較
-- preprocess_のベンチマーク比較
+- preprocessHelperのベンチマーク比較
 - preprocess全体のベンチマーク比較
 
 ### 7. 最適化の試み④：入力データ形式の変更
