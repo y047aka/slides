@@ -176,7 +176,7 @@ customizedHtmlRenderer =
                     Html.h1 [ css [ margin zero, fontSize (em 1.4) ] ] children
 
                 Block.H2 ->
-                    Html.h2 [] children
+                    Html.h2 [ css [ margin2 (em 0.6) zero, fontSize (em 1) ] ] children
 
                 Block.H3 ->
                     Html.h3 [] children
@@ -248,7 +248,7 @@ customizedHtmlRenderer =
         Html.text
     , unorderedList =
         \items ->
-            Html.ul []
+            Html.ul [ css [ margin2 (em 0.6) zero ] ]
                 (items
                     |> List.map
                         (\item ->
@@ -277,7 +277,7 @@ customizedHtmlRenderer =
                                                         ]
                                                         []
                                     in
-                                    Html.li [] (checkbox :: children)
+                                    Html.li [ css [ margin2 (em 0.4) zero ] ] (checkbox :: children)
                         )
                 )
     , orderedList =
