@@ -37,6 +37,7 @@ slides =
 
     -- はじめに
     , introduction
+    , elmIntro
     , motivation
     , benchmark_basics
     , benchmark_considerations
@@ -143,6 +144,24 @@ introduction =
     - AssocList を Dict に置き換える
     - 計算ロジックを改良する
     - 入力データ形式の変更
+"""
+    ]
+
+
+elmIntro : List Content
+elmIntro =
+    [ pageHeader
+        { chapter = "はじめに"
+        , title = "Elm の紹介"
+        }
+    , markdownPage """
+Elm はフロントエンド開発向けの純粋関数型言語です。
+
+- JavaScriptにコンパイルされる
+- 型安全性が高く、Webアプリを安全に構築できる
+- The Elm Architecture（TEA）による宣言的なUI設計
+- HaskellやOCamlなどの影響を受けつつ、シンプルな文法で学びやすい
+- 親切なエラーメッセージで開発体験が良い
 """
     ]
 
