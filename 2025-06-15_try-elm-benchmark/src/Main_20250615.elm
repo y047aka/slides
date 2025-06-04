@@ -68,7 +68,7 @@ slides =
     , replaceWithDict_ordersByLap_benchmark
     , replaceWithDict_preprocessHelper_benchmark
 
-    -- 改善③：計算ロジックを改良する
+    -- 改善③ 計算ロジックを改良する
     , improve_logic_overview
     , improve_logic_code_old
     , improve_logic_code
@@ -76,13 +76,15 @@ slides =
     , improve_logic_preprocessHelper_benchmark
     , improve_logic_benchmark
 
-    -- 改善④：入力データ形式の変更
+    -- 改善④ 入力データ形式の変更
     , replaceWithJson_overview
     , replaceWithJson_benchmark
 
+    -- 改善⑤ その他の選択肢
+    , cli
+
     -- ベンチマークから得られた知見
     , lessonsLearned
-    , realWorldApplications
 
     -- まとめ
     , conclusion
@@ -661,7 +663,7 @@ replaceWithDict_preprocessHelper_benchmark =
 improve_logic_overview : List Content
 improve_logic_overview =
     [ pageHeader
-        { chapter = "改善③：計算ロジックを改良する"
+        { chapter = "改善③ 計算ロジックを改良する"
         , title = "概要"
         }
     , markdownPage """
@@ -679,7 +681,7 @@ improve_logic_overview =
 improve_logic_code_old : List Content
 improve_logic_code_old =
     [ pageHeader
-        { chapter = "改善③：計算ロジックを改良する"
+        { chapter = "改善③ 計算ロジックを改良する"
         , title = "実装の変更"
         }
     , highlightElm """laps_old : { carNumber : String, laps : List Wec.Lap } -> List Lap
@@ -714,7 +716,7 @@ laps_old { carNumber, laps } =
 improve_logic_code : List Content
 improve_logic_code =
     [ pageHeader
-        { chapter = "改善③：計算ロジックを改良する"
+        { chapter = "改善③ 計算ロジックを改良する"
         , title = "実装の変更"
         }
     , highlightElm """laps_improved : { carNumber : String, laps : List Wec.Lap } -> List Lap
@@ -748,7 +750,7 @@ laps_improved { carNumber, laps } =
 improve_logic_laps_benchmark : List Content
 improve_logic_laps_benchmark =
     [ pageHeader
-        { chapter = "改善③：計算ロジックを改良する"
+        { chapter = "改善③ 計算ロジックを改良する"
         , title = "ベンチマーク：laps_"
         }
     , Custom.benchmark <|
@@ -772,7 +774,7 @@ improve_logic_laps_benchmark =
 improve_logic_preprocessHelper_benchmark : List Content
 improve_logic_preprocessHelper_benchmark =
     [ pageHeader
-        { chapter = "改善③：計算ロジックを改良する"
+        { chapter = "改善③ 計算ロジックを改良する"
         , title = "ベンチマーク：preprocessHelper"
         }
     , Custom.benchmark <|
@@ -797,7 +799,7 @@ improve_logic_preprocessHelper_benchmark =
 improve_logic_benchmark : List Content
 improve_logic_benchmark =
     [ pageHeader
-        { chapter = "改善③：計算ロジックを改良する"
+        { chapter = "改善③ 計算ロジックを改良する"
         , title = "ベンチマーク：preprocess"
         }
     , Custom.benchmark <|
@@ -829,7 +831,7 @@ improve_logic_benchmark =
 replaceWithJson_overview : List Content
 replaceWithJson_overview =
     [ pageHeader
-        { chapter = "改善④：入力データ形式の変更"
+        { chapter = "改善④ 入力データ形式の変更"
         , title = "CSVからJSONへの移行"
         }
     , markdownPage """
@@ -855,7 +857,7 @@ processJsonData json =
 replaceWithJson_benchmark : List Content
 replaceWithJson_benchmark =
     [ pageHeader
-        { chapter = "改善④：入力データ形式の変更"
+        { chapter = "改善④ 入力データ形式の変更"
         , title = "ベンチマーク：decodedr"
         }
     , Custom.benchmark <|
@@ -885,49 +887,42 @@ replaceWithJson_benchmark =
     ]
 
 
+cli : List Content
+cli =
+    [ pageHeader
+        { chapter = "改善⑤ その他の選択肢"
+        , title = ""
+        }
+    , markdownPage """
+- ElmにはUIのないヘッドレスプログラムを作成する機能がある
+    - CLIアプリケーションを作ることが可能
+    - 既存のElmのアプリケーションコードを転用できる
+    - CSVデコードや前処理を実行済みのJSONを出力し、それを読み込むことにした
+        - ボトルネック解消！！！
+- Html.Lazy や Html.Keyed の活用
+    - もしボトルネックがViewの再描画にある場合は、これらの関数を活用することで改善できる
+"""
+    ]
+
+
 lessonsLearned : List Content
 lessonsLearned =
     [ pageHeader
         { chapter = "ベンチマークから得られた知見"
-        , title = "データ構造とパフォーマンスの関係"
+        , title = "データ構造・パフォーマンス・実務応用"
         }
     , markdownPage """
-- データ構造選択の影響度（List vs Array）
-- 専用デコーダーの重要性
-- データ量とパフォーマンスの関係性
-- Elm特有の最適化ポイント
+## 実務でのパフォーマンス最適化
+
+- パフォーマンス問題の主な種類
+    - 初期化時間の遅さ (大量データの初期ロード)
+    - 更新処理の遅さ (Updateサイクルの最適化)
+    - 描画の遅さ (DOM操作の最小化)
+- The Elm Architectureでの最適化
+    - Html.Lazy, Html.Keyed の活用
+    - モデル設計の見直し
+    - データ構造の選択
 """
-    , highlightCode """-- 最初の実装と最終実装の比較
--- 処理速度: 初期実装 vs 最適化後
--- 初期実装: 2.4 seconds
--- 最適化後: 0.4 seconds (83%改善)
-
-主な改善ポイント:
-1. 専用デコーダーの利用
-2. 適切なデータ構造の選択
-3. 入力データ形式の最適化"""
-    ]
-
-
-realWorldApplications : List Content
-realWorldApplications =
-    [ pageHeader
-        { chapter = "ベンチマークから得られた知見"
-        , title = "実務でのパフォーマンス最適化"
-        }
-    , markdownPage """
-- データ処理と DOM操作の違い
-- The Elm Architectureでのパフォーマンス考慮点
-- 実務での優先順位の決め方
-"""
-    , highlightElm """-- パフォーマンス問題の主な種類:
-1. 初期化時間の遅さ (大量データの初期ロード)
-2. 更新処理の遅さ (Updateサイクルの最適化)
-3. 描画の遅さ (DOM操作の最小化)
-
--- The Elm Architectureでの最適化
--- Html.Lazy, Html.Keyed の活用
--- モデル設計の見直し"""
     ]
 
 
