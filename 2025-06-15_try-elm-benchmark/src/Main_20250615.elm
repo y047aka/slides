@@ -64,11 +64,14 @@ slides =
     -- 改善② AssocList を Dict に置き換える
     , replaceWithDict_overview
     , replaceWithDict_comparison
+    , replaceWithDict_code
     , replaceWithDict_ordersByLap_benchmark
     , replaceWithDict_preprocessHelper_benchmark
 
     -- 改善③：計算ロジックを改良する
     , improve_logic_overview
+    , improve_logic_code_old
+    , improve_logic_code
     , improve_logic_laps_benchmark
     , improve_logic_preprocessHelper_benchmark
     , improve_logic_benchmark
@@ -457,6 +460,12 @@ startPositions laps =
         |> Array.toList
         |> List.sortBy .elapsed
         |> List.map .carNumber"""
+    , markdownPage """
+- 困ったこと
+    - Arrayを操作する関数があまり提供されていない
+        - そのため、ArrayをListに変換する処理を挟むことになる
+        - その場合にも若干のパフォーマンス向上はありそうだけど...
+"""
     ]
 
 
@@ -466,11 +475,11 @@ replaceWithArray_benchmark : List Content
 replaceWithArray_benchmark =
     [ pageHeader
         { chapter = "改善① List を Array に置き換える"
-        , title = "ベンチマーク"
+        , title = "ベンチマーク：startPositions"
         }
     , Custom.benchmark <|
-        Benchmark.describe "Data.Wec.Preprocess"
-            [ Benchmark.scale "startPositions_list"
+        Benchmark.describe "startPositions"
+            [ Benchmark.scale "List"
                 ([ 5 -- 10,777,648 runs/s (GoF: 99.95%)
                  , 50 -- 2,137,145 runs/s (GoF: 99.93%)
                  , 500 -- 206,667 runs/s (GoF: 99.84%)
@@ -479,7 +488,7 @@ replaceWithArray_benchmark =
                     |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                     |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.startPositions_list target ))
                 )
-            , Benchmark.scale "startPositions_array"
+            , Benchmark.scale "Array"
                 ([ 5 -- 3,936,471 runs/s (GoF: 99.95%)
                  , 50 -- 1,500,727 runs/s (GoF: 99.97%)
                  , 500 -- 230,693 runs/s (GoF: 99.96%)
@@ -509,8 +518,6 @@ replaceWithArray_result =
     , markdownPage """
 - 困ったこと
     - Arrayを操作する関数があまり提供されていない
-        - そのため、ArrayをListに変換する処理を挟むことになる
-        - その場合にも若干のパフォーマンス向上はあるけど...
 - 解決策
     - Arrayを操作する関数を自作する
 """
@@ -554,6 +561,28 @@ replaceWithDict_comparison =
     ]
 
 
+replaceWithDict_code : List Content
+replaceWithDict_code =
+    [ pageHeader
+        { chapter = "改善② AssocList を Dict に置き換える"
+        , title = "実装の変更"
+        }
+    , highlightElm """{-| 各周回での各車両の順位を求める関数
+-}
+ordersByLap_dict : List Wec.Lap -> OrdersByLap
+ordersByLap_dict laps =
+    laps
+        |> Dict.Extra.groupBy .lapNumber
+        |> Dict.toList
+        |> List.map
+            (\\( lapNumber, cars ) ->
+                { lapNumber = lapNumber
+                , order = cars |> List.sortBy .elapsed |> List.map .carNumber
+                }
+            )"""
+    ]
+
+
 replaceWithDict_ordersByLap_benchmark : List Content
 replaceWithDict_ordersByLap_benchmark =
     [ pageHeader
@@ -561,8 +590,8 @@ replaceWithDict_ordersByLap_benchmark =
         , title = "ベンチマーク：ordersByLap"
         }
     , Custom.benchmark <|
-        Benchmark.describe "Data.Wec.Preprocess"
-            [ Benchmark.scale "ordersByLap_list"
+        Benchmark.describe "ordersByLap"
+            [ Benchmark.scale "AssocList"
                 ([ 5 -- 1,290,015 runs/s (GoF: 99.97%)
                  , 50 -- 71,653 runs/s (GoF: 99.98%)
                  , 500 -- 625 runs/s (GoF: 99.99%)
@@ -572,7 +601,7 @@ replaceWithDict_ordersByLap_benchmark =
                     |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                     |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.ordersByLap_list target ))
                 )
-            , Benchmark.scale "ordersByLap_dict"
+            , Benchmark.scale "Dict"
                 ([ 5 -- 945,315 runs/s (GoF: 99.99%)
                  , 50 -- 64,006 runs/s (GoF: 99.98%)
                  , 500 -- 5,279 runs/s (GoF: 99.99%)
@@ -593,30 +622,28 @@ replaceWithDict_preprocessHelper_benchmark =
         , title = "ベンチマーク：preprocessHelper"
         }
     , Custom.benchmark <|
-        Benchmark.describe "Data.Wec.Preprocess"
-            [ let
-                options_beginning =
-                    { carNumber = "15"
-                    , laps = Fixture.csvDecodedForCarNumber "15"
-                    , startPositions = Beginning.startPositions_list Fixture.csvDecoded
-                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
-                    }
+        let
+            options_beginning =
+                { carNumber = "15"
+                , laps = Fixture.csvDecodedForCarNumber "15"
+                , startPositions = Beginning.startPositions_list Fixture.csvDecoded
+                , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
+                }
 
-                options_dict =
-                    { carNumber = "15"
-                    , laps = Fixture.csvDecodedForCarNumber "15"
-                    , startPositions = Data.Wec.Preprocess.Dict.startPositions_list Fixture.csvDecoded
-                    , ordersByLap = Data.Wec.Preprocess.Dict.ordersByLap_dict Fixture.csvDecoded
-                    }
-              in
-              Benchmark.compare "preprocessHelper"
-                "old"
-                -- 349 runs/s (GoF: 99.99%)
-                (\_ -> Beginning.preprocessHelper options_beginning)
-                "improved"
-                -- 2,215 runs/s (GoF: 99.95%)
-                (\_ -> Data.Wec.Preprocess.Dict.preprocessHelper options_dict)
-            ]
+            options_dict =
+                { carNumber = "15"
+                , laps = Fixture.csvDecodedForCarNumber "15"
+                , startPositions = Data.Wec.Preprocess.Dict.startPositions_list Fixture.csvDecoded
+                , ordersByLap = Data.Wec.Preprocess.Dict.ordersByLap_dict Fixture.csvDecoded
+                }
+        in
+        Benchmark.compare "preprocessHelper"
+            "old"
+            -- 349 runs/s (GoF: 99.99%)
+            (\_ -> Beginning.preprocessHelper options_beginning)
+            "improved"
+            -- 2,215 runs/s (GoF: 99.95%)
+            (\_ -> Data.Wec.Preprocess.Dict.preprocessHelper options_dict)
     ]
 
 
@@ -638,6 +665,75 @@ improve_logic_overview =
     ]
 
 
+improve_logic_code_old : List Content
+improve_logic_code_old =
+    [ pageHeader
+        { chapter = "改善③：計算ロジックを改良する"
+        , title = "実装の変更"
+        }
+    , highlightElm """laps_old : { carNumber : String, laps : List Wec.Lap } -> List Lap
+laps_old { carNumber, laps } =
+    laps
+        |> List.indexedMap
+            (\\index { s1, s2, s3 } ->
+                { ...
+                , s1_best =
+                    laps
+                        |> List.take (index + 1)
+                        |> List.filterMap .s1
+                        |> List.minimum
+                        |> Maybe.withDefault 0
+                , s2_best =
+                    laps
+                        |> List.take (index + 1)
+                        |> List.filterMap .s2
+                        |> List.minimum
+                        |> Maybe.withDefault 0
+                , s3_best =
+                    laps
+                        |> List.take (index + 1)
+                        |> List.filterMap .s3
+                        |> List.minimum
+                        |> Maybe.withDefault 0
+                }
+            )"""
+    ]
+
+
+improve_logic_code : List Content
+improve_logic_code =
+    [ pageHeader
+        { chapter = "改善③：計算ロジックを改良する"
+        , title = "実装の変更"
+        }
+    , highlightElm """laps_improved : { carNumber : String, laps : List Wec.Lap } -> List Lap
+laps_improved { carNumber, laps } =
+    let
+        step : Wec.Lap -> Acc -> Acc
+        step { s1, s2, s3 } acc =
+            let
+                ( bestS1, bestS2, bestS3 ) =
+                    ( List.minimum (List.filterMap identity [ s1, acc.bestS1 ])
+                    , List.minimum (List.filterMap identity [ s2, acc.bestS2 ])
+                    , List.minimum (List.filterMap identity [ s3, acc.bestS3 ])
+                    )
+
+                currentLap =
+                    ...
+            in
+            { bestS1 = bestS1
+            , bestS2 = bestS2
+            , bestS3 = bestS3
+            , laps = currentLap :: acc.laps
+            }
+    in
+    laps
+        |> List.foldl step initialAcc
+        |> .laps
+        |> List.reverse"""
+    ]
+
+
 improve_logic_laps_benchmark : List Content
 improve_logic_laps_benchmark =
     [ pageHeader
@@ -645,22 +741,20 @@ improve_logic_laps_benchmark =
         , title = "ベンチマーク：laps_"
         }
     , Custom.benchmark <|
-        Benchmark.describe "Data.Wec.Preprocess"
-            [ let
-                options =
-                    { carNumber = "15"
-                    , laps = Fixture.csvDecodedForCarNumber "15"
-                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
-                    }
-              in
-              Benchmark.compare "laps_"
-                "old"
-                -- 294 runs/s (GoF: 99.99%)
-                (\_ -> Beginning.laps_ options)
-                "improved"
-                -- 2,199 runs/s (GoF: 99.96%)
-                (\_ -> Data.Wec.Preprocess.laps_ options)
-            ]
+        let
+            options =
+                { carNumber = "15"
+                , laps = Fixture.csvDecodedForCarNumber "15"
+                , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
+                }
+        in
+        Benchmark.compare "laps_"
+            "old"
+            -- 294 runs/s (GoF: 99.99%)
+            (\_ -> Beginning.laps_ options)
+            "improved"
+            -- 2,199 runs/s (GoF: 99.96%)
+            (\_ -> Data.Wec.Preprocess.laps_ options)
     ]
 
 
@@ -671,23 +765,21 @@ improve_logic_preprocessHelper_benchmark =
         , title = "ベンチマーク：preprocessHelper"
         }
     , Custom.benchmark <|
-        Benchmark.describe "Data.Wec.Preprocess"
-            [ let
-                options =
-                    { carNumber = "15"
-                    , laps = Fixture.csvDecodedForCarNumber "15"
-                    , startPositions = Beginning.startPositions_list Fixture.csvDecoded
-                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
-                    }
-              in
-              Benchmark.compare "preprocessHelper"
-                "old"
-                -- 349 runs/s (GoF: 99.99%)
-                (\_ -> Beginning.preprocessHelper options)
-                "improved"
-                -- 2,215 runs/s (GoF: 99.95%)
-                (\_ -> Data.Wec.Preprocess.preprocessHelper options)
-            ]
+        let
+            options =
+                { carNumber = "15"
+                , laps = Fixture.csvDecodedForCarNumber "15"
+                , startPositions = Beginning.startPositions_list Fixture.csvDecoded
+                , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
+                }
+        in
+        Benchmark.compare "preprocessHelper"
+            "old"
+            -- 349 runs/s (GoF: 99.99%)
+            (\_ -> Beginning.preprocessHelper options)
+            "improved"
+            -- 2,215 runs/s (GoF: 99.95%)
+            (\_ -> Data.Wec.Preprocess.preprocessHelper options)
     ]
 
 
@@ -698,7 +790,7 @@ improve_logic_benchmark =
         , title = "ベンチマーク：preprocess"
         }
     , Custom.benchmark <|
-        Benchmark.describe "Data.Wec.Preprocess.preprocess"
+        Benchmark.describe "preprocess"
             [ Benchmark.scale "old"
                 ([ 10 -- 67,307 runs/s (GoF: 99.99%)
                  , 100 -- 1,272 runs/s (GoF: 99.99%)
@@ -745,11 +837,7 @@ jsonDecoder =
 
 processJsonData : String -> Result Decode.Error (List CsvData)
 processJsonData json =
-    Decode.decodeString (Decode.list jsonDecoder) json
-
--- 処理速度: CSV vs JSON
--- CSV: 0.9 seconds
--- JSON: 0.4 seconds (55%改善)"""
+    Decode.decodeString (Decode.list jsonDecoder) json"""
     ]
 
 
@@ -757,34 +845,32 @@ replaceWithJson_benchmark : List Content
 replaceWithJson_benchmark =
     [ pageHeader
         { chapter = "改善④：入力データ形式の変更"
-        , title = "ベンチマーク：xxxDecoded"
+        , title = "ベンチマーク：decodedr"
         }
     , Custom.benchmark <|
-        Benchmark.describe "Data.Wec.Preprocess"
-            [ Benchmark.compare "xxxDecoded"
-                "csvDecoded"
-                -- 307 runs/s (GoF: 99.99%) ※426件のデータで実施
-                -- 24 runs/s (GoF: 99.99%)
-                (\_ ->
-                    case CD.decodeCustom { fieldSeparator = ';' } FieldNamesFromFirstRow Wec.lapDecoder Fixture.csv of
-                        Ok decoded_ ->
-                            decoded_
+        Benchmark.compare "decodedr"
+            "csvDecoded"
+            -- 307 runs/s (GoF: 99.99%) ※426件のデータで実施
+            -- 24 runs/s (GoF: 99.99%)
+            (\_ ->
+                case CD.decodeCustom { fieldSeparator = ';' } FieldNamesFromFirstRow Wec.lapDecoder Fixture.csv of
+                    Ok decoded_ ->
+                        decoded_
 
-                        Err _ ->
-                            []
-                )
-                "jsonDecoded"
-                -- 799 runs/s (GoF: 100%) ※426件のデータで実施
-                -- 62 runs/s (GoF: 99.99%)
-                (\_ ->
-                    case JD.decodeString (JD.field "laps" (JD.list Data.Wec.lapDecoder)) Fixture.json of
-                        Ok decoded_ ->
-                            decoded_
+                    Err _ ->
+                        []
+            )
+            "jsonDecoded"
+            -- 799 runs/s (GoF: 100%) ※426件のデータで実施
+            -- 62 runs/s (GoF: 99.99%)
+            (\_ ->
+                case JD.decodeString (JD.field "laps" (JD.list Data.Wec.lapDecoder)) Fixture.json of
+                    Ok decoded_ ->
+                        decoded_
 
-                        Err _ ->
-                            []
-                )
-            ]
+                    Err _ ->
+                        []
+            )
     ]
 
 
