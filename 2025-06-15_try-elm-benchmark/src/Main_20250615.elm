@@ -38,6 +38,8 @@ slides =
     -- はじめに
     , introduction
     , motivation
+    , benchmark_basics
+    , benchmark_considerations
 
     -- elm-explorations/benchmark
     , elmBenchmark_overview
@@ -123,15 +125,16 @@ introduction : List Content
 introduction =
     [ pageHeader
         { chapter = "はじめに"
-        , title = "Elmの特徴とパフォーマンスの疑問"
+        , title = "発表の流れ"
         }
     , markdownPage """
-- Elmの紹介と特徴
-- パフォーマンスに関する一般的な認識と疑問
-- Elmは遅いのか？速いのか？
-- 今回の検証の目的
-
-型安全性や開発体験の良さが注目されがちですが、実際のパフォーマンスはどうなのでしょうか？
+- Elmの簡単な紹介
+- ベンチマーク測定方法の説明
+- 最適化の試み
+    - List を Array に置き換える
+    - AssocList を Dict に置き換える
+    - 計算ロジックを改良する
+    - 入力データ形式の変更
 """
     ]
 
@@ -140,15 +143,49 @@ motivation : List Content
 motivation =
     [ pageHeader
         { chapter = "はじめに"
-        , title = "パフォーマンス計測の動機"
+        , title = "今回の動機"
         }
     , markdownPage """
-- 好奇心
-    - ベンチマークを測定してみたい
-        - `List` と `Array` のパフォーマンスの違いを体感したい
+- 好奇心：ベンチマークテストを体験してみたい
+    - `List` と `Array` のパフォーマンスの違いを体感する
     - 非効率なコードが残っているうちに試したい
         - 改善の幅が大きいほうが楽しい
-    - 性能向上を主目的としていない点にご留意ください
+        - アプリケーションの機能追加を予定していたので、その前に挑戦したい
+"""
+    ]
+
+
+benchmark_basics : List Content
+benchmark_basics =
+    [ pageHeader
+        { chapter = "はじめに"
+        , title = "ベンチマークテストの概要"
+        }
+    , markdownPage """
+- ベンチマークテストの目的
+    - システムの性能を評価する
+    - 異なる実装アプローチでの性能を比較する
+    - ボトルネックを特定する
+- いつベンチマークを測定する？
+    - パフォーマンスの問題が発生したとき
+"""
+    ]
+
+
+benchmark_considerations : List Content
+benchmark_considerations =
+    [ pageHeader
+        { chapter = "はじめに"
+        , title = "ベンチマーク測定時の注意点"
+        }
+    , markdownPage """
+- 測定環境の統一
+    - CPU、メモリ、ネットワーク環境などの条件を揃える
+    - バックグラウンドプロセスの影響を最小化
+- 統計的な有意性
+    - 十分なサンプル数の確保、外れ値の除外
+- 測定の再現性
+    - 同じ条件での再測定すれば、同じ結果が得られるように
 """
     ]
 
@@ -160,11 +197,13 @@ elmBenchmark_overview =
         , title = "Elmコードのベンチマークを実行するためのパッケージ"
         }
     , markdownPage """
-- Warming JIT：測定前にJITコンパイルを強制する
-- Collecting Samples：統計的に有意な結果を得るまで反復実行
-    - 複数対象を交互に実行し、測定の偏りを軽減する
-- Goodness of Fit：測定結果の信頼性を評価する指標
-  - （99%: 優秀 / 95%: 良好 / 90%: 要注意 / 80%以下: 信頼性低）
+- 測定環境の統一
+    - 測定前にJITコンパイルを強制する（Warming JIT）
+- 統計的な有意性
+    - 有意な結果を得るまで反復実行（Collecting Samples）
+        - 複数対象を交互に実行し、測定の偏りを軽減する
+    - 測定結果の信頼性を評価する指標（Goodness of Fit）
+        - （99%: 優秀 / 95%: 良好 / 90%: 要注意 / 80%以下: 信頼性低）
 """
     ]
 
