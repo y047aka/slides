@@ -54,23 +54,26 @@ slides =
     -- 検証用サンプルデータ
     , optimization_ideas
 
-    -- 最適化① List を Array に置き換える
+    -- 改善① List を Array に置き換える
     , replaceWithArray_overview
     , replaceWithArray_study
     , replaceWithArray_code
     , replaceWithArray_benchmark
     , replaceWithArray_result
 
-    -- 最適化② AssocList を Dict に置き換える
+    -- 改善② AssocList を Dict に置き換える
+    , replaceWithDict_overview
+    , replaceWithDict_comparison
     , replaceWithDict_ordersByLap_benchmark
     , replaceWithDict_preprocess_benchmark
 
-    -- 最適化の試み③：計算ロジックを改良する
+    -- 改善③：計算ロジックを改良する
+    , improve_logic_overview
     , improve_logic_laps_benchmark
     , improve_logic_preprocess_benchmark
     , improve_logic_benchmark
 
-    -- 最適化の試み④：入力データ形式の変更
+    -- 改善④：入力データ形式の変更
     , replaceWithJson_overview
     , replaceWithJson_benchmark
 
@@ -359,11 +362,11 @@ optimization_ideas : List Content
 optimization_ideas =
     [ pageHeader
         { chapter = "パフォーマンス改善の計画"
-        , title = "パフォーマンス改善のアイデア"
+        , title = "改善のアイデア"
         }
     , markdownPage """
 - `List` を `Array` に置き換える
-    - 1万行以上のデータを扱うので、Arrayの優位性を体感できそう
+    - 1万行以上のデータを扱うので、Arrayの優位性を体感できそう？
 - `AssocList` を `Dict` に置き換える
 - 計算ロジックの見直し
 - CSVのデコードパッケージを自作する
@@ -375,8 +378,8 @@ optimization_ideas =
 replaceWithArray_overview : List Content
 replaceWithArray_overview =
     [ pageHeader
-        { chapter = "最適化①"
-        , title = "List を Array に置き換える"
+        { chapter = "改善① List を Array に置き換える"
+        , title = "概要"
         }
     , markdownPage """
 - Listは線形検索、Arrayはインデックスアクセスに強い
@@ -398,7 +401,7 @@ startPositions laps =
 replaceWithArray_study : List Content
 replaceWithArray_study =
     [ pageHeader
-        { chapter = "最適化① List を Array に置き換える"
+        { chapter = "改善① List を Array に置き換える"
         , title = "List.length と Array.length の比較"
         }
     , Custom.benchmark <|
@@ -442,7 +445,7 @@ toString n =
 replaceWithArray_code : List Content
 replaceWithArray_code =
     [ pageHeader
-        { chapter = "最適化① List を Array に置き換える"
+        { chapter = "改善① List を Array に置き換える"
         , title = "実装の変更"
         }
     , highlightElm """{-| スタート時の各車両の順位を求める関数
@@ -462,7 +465,7 @@ startPositions laps =
 replaceWithArray_benchmark : List Content
 replaceWithArray_benchmark =
     [ pageHeader
-        { chapter = "最適化① List を Array に置き換える"
+        { chapter = "改善① List を Array に置き換える"
         , title = "ベンチマーク"
         }
     , Custom.benchmark <|
@@ -500,7 +503,7 @@ startPositions_array laps =
 replaceWithArray_result : List Content
 replaceWithArray_result =
     [ pageHeader
-        { chapter = "最適化① List を Array に置き換える"
+        { chapter = "改善① List を Array に置き換える"
         , title = "結果"
         }
     , markdownPage """
@@ -514,10 +517,47 @@ replaceWithArray_result =
     ]
 
 
+replaceWithDict_overview : List Content
+replaceWithDict_overview =
+    [ pageHeader
+        { chapter = "改善② AssocList を Dict に置き換える"
+        , title = "概要"
+        }
+    , markdownPage """
+- 課題
+    - AssocListを使用しているため、検索に線形時間が必要
+    - データ量が増えると処理時間が比例して増加
+- 改善の方針
+    - Dictを使用して検索を定数時間に改善
+- 期待される効果
+    - 大規模データでの処理速度の向上
+"""
+    ]
+
+
+replaceWithDict_comparison : List Content
+replaceWithDict_comparison =
+    [ pageHeader
+        { chapter = "改善② AssocList を Dict に置き換える"
+        , title = "AssocList と Dictの比較"
+        }
+    , markdownPage """
+- AssocList
+    - キーと値のペアをリストで管理（任意の型をキーにできる）
+    - 線形検索が必要（O(n)）
+    - メモリ使用量が少ない
+- Dict
+    - ハッシュベースの実装
+    - 定数時間でのアクセスが可能（O(1)）
+    - メモリ使用量が多い
+"""
+    ]
+
+
 replaceWithDict_ordersByLap_benchmark : List Content
 replaceWithDict_ordersByLap_benchmark =
     [ pageHeader
-        { chapter = "最適化② AssocList を Dict に置き換える"
+        { chapter = "改善② AssocList を Dict に置き換える"
         , title = "ベンチマーク：ordersByLap"
         }
     , Custom.benchmark <|
@@ -549,7 +589,7 @@ replaceWithDict_ordersByLap_benchmark =
 replaceWithDict_preprocess_benchmark : List Content
 replaceWithDict_preprocess_benchmark =
     [ pageHeader
-        { chapter = "最適化② AssocList を Dict に置き換える"
+        { chapter = "改善② AssocList を Dict に置き換える"
         , title = "ベンチマーク：preprocess_"
         }
     , Custom.benchmark <|
@@ -580,10 +620,28 @@ replaceWithDict_preprocess_benchmark =
     ]
 
 
+improve_logic_overview : List Content
+improve_logic_overview =
+    [ pageHeader
+        { chapter = "改善③：計算ロジックを改良する"
+        , title = "概要"
+        }
+    , markdownPage """
+- 課題
+    - 不要な計算の繰り返し
+- 改善の方針
+    - 計算の効率化
+        - 中間結果の再利用
+    - アルゴリズムの改善
+        - 計算量の削減
+"""
+    ]
+
+
 improve_logic_laps_benchmark : List Content
 improve_logic_laps_benchmark =
     [ pageHeader
-        { chapter = "最適化の試み③：計算ロジックを改良する"
+        { chapter = "改善③：計算ロジックを改良する"
         , title = "ベンチマーク：laps_"
         }
     , Custom.benchmark <|
@@ -609,7 +667,7 @@ improve_logic_laps_benchmark =
 improve_logic_preprocess_benchmark : List Content
 improve_logic_preprocess_benchmark =
     [ pageHeader
-        { chapter = "最適化の試み③：計算ロジックを改良する"
+        { chapter = "改善③：計算ロジックを改良する"
         , title = "ベンチマーク：preprocess_"
         }
     , Custom.benchmark <|
@@ -636,7 +694,7 @@ improve_logic_preprocess_benchmark =
 improve_logic_benchmark : List Content
 improve_logic_benchmark =
     [ pageHeader
-        { chapter = "最適化の試み③：計算ロジックを改良する"
+        { chapter = "改善③：計算ロジックを改良する"
         , title = "ベンチマーク：preprocess"
         }
     , Custom.benchmark <|
@@ -668,7 +726,7 @@ improve_logic_benchmark =
 replaceWithJson_overview : List Content
 replaceWithJson_overview =
     [ pageHeader
-        { chapter = "最適化の試み④：入力データ形式の変更"
+        { chapter = "改善④：入力データ形式の変更"
         , title = "CSVからJSONへの移行"
         }
     , markdownPage """
@@ -698,7 +756,7 @@ processJsonData json =
 replaceWithJson_benchmark : List Content
 replaceWithJson_benchmark =
     [ pageHeader
-        { chapter = "最適化の試み④：入力データ形式の変更"
+        { chapter = "改善④：入力データ形式の変更"
         , title = "ベンチマーク：xxxDecoded"
         }
     , Custom.benchmark <|
