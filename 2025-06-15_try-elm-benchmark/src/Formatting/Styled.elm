@@ -1,4 +1,4 @@
-module Formatting.Styled exposing (background, col, color, colored, highlightCode, highlightElm, image, markdown, markdownPage, noPointerEvents, padded, pageHeader, position, row, spacer, title)
+module Formatting.Styled exposing (background, col, color, colored, highlightCode, highlightElm, image, markdown, markdownPage, noPointerEvents, padded, page, position, row, spacer, title)
 
 import Css exposing (..)
 import Css.Global exposing (children, everything)
@@ -8,7 +8,7 @@ import Markdown.Block as Block
 import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer exposing (Renderer)
-import SliceShow.Content exposing (Content, item)
+import SliceShow.Content exposing (Content, container, item)
 import SyntaxHighlight exposing (elm, noLang, toBlockHtml)
 
 
@@ -20,6 +20,17 @@ slidePadding =
 padded : List (Html msg) -> Html msg
 padded =
     div [ css [ slidePadding ] ]
+
+
+page : PageHeader -> List (Content model msg) -> List (Content model msg)
+page props contents =
+    [ container
+        (List.map Html.fromUnstyled
+            >> div [ css [ height (pct 100) ] ]
+            >> Html.toUnstyled
+        )
+        (pageHeader props :: contents)
+    ]
 
 
 background : String -> List (Html msg) -> Content model msg
