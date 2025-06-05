@@ -14,7 +14,7 @@ import SyntaxHighlight exposing (elm, noLang, toBlockHtml)
 
 slidePadding : Css.Style
 slidePadding =
-    padding2 (px 40) (px 80)
+    padding2 (px 20) (px 80)
 
 
 padded : List (Html msg) -> Html msg

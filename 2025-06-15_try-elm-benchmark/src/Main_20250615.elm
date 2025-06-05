@@ -12,7 +12,7 @@ import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
 import Formatting.Styled as Formatting exposing (background, colored, highlightElm, image, markdown, markdownPage, page, spacer)
-import Html.Styled as Html exposing (br, h1, img, span, text)
+import Html.Styled as Html exposing (br, div, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
 import MyBenchmark as Benchmark
@@ -100,33 +100,41 @@ cover =
         "#FFF"
         [ h1 []
             [ span
-                [ css [ fontSize (rem 5) ] ]
+                [ css [ fontSize (rem 5.5) ] ]
                 [ text "Elmのパフォーマンス、実際どうなの？" ]
-            , br [] []
-            , span [ css [ fontSize (rem 14) ] ] [ text "ベンチマークに入門してみた" ]
-            ]
-        , spacer 50
-        , img
-            [ src "assets/images/y047aka.png"
-            , css
-                [ width (px 75)
-                , borderRadius (pct 50)
+            , spacer 20
+            , span [ css [ lineHeight (num 1.1), fontSize (rem 15) ] ]
+                [ text "ベンチマークに"
+                , br [] []
+                , text "入門してみた"
                 ]
             ]
-            []
-        , span
+        , div
             [ css
-                [ position relative
-                , top (rem -2)
-                , paddingLeft (em 0.5)
-                , fontSize (rem 4.5)
+                [ displayFlex
+                , alignItems center
+                , property "column-gap" "10px"
                 ]
             ]
-            [ text "Yoshitaka Totsuka" ]
-        , spacer 20
-        , text "関数型まつり2025"
-        , spacer 10
-        , text "2025-06-14"
+            [ img
+                [ src "assets/images/y047aka.png"
+                , css [ width (px 50), borderRadius (pct 50) ]
+                ]
+                []
+            , span [ css [ fontSize (rem 3) ] ]
+                [ text "Yoshitaka Totsuka" ]
+            ]
+        , spacer 15
+        , div
+            [ css
+                [ displayFlex
+                , alignItems baseline
+                , property "column-gap" "10px"
+                ]
+            ]
+            [ span [] [ text "関数型まつり2025" ]
+            , span [] [ text "2025-06-14" ]
+            ]
         ]
     ]
 
