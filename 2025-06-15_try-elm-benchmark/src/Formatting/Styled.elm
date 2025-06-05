@@ -327,7 +327,9 @@ customizedHtmlRenderer =
                                 itemBlocks
                         )
                 )
-    , html = Markdown.Html.oneOf []
+    , html =
+        Markdown.Html.oneOf
+            [ Markdown.Html.tag "br" (\children -> Html.br [] children) ]
     , codeBlock =
         \{ body, language } ->
             let
@@ -347,56 +349,36 @@ customizedHtmlRenderer =
                     ]
                 ]
     , thematicBreak = Html.hr [] []
-    , table = Html.table []
+    , table =
+        Html.table
+            [ css
+                [ width (pct 100)
+                , borderCollapse collapse
+                , fontSize (rem 2.4)
+                ]
+            ]
     , tableHeader = Html.thead []
     , tableBody = Html.tbody []
     , tableRow = Html.tr []
     , tableHeaderCell =
         \maybeAlignment ->
-            let
-                attrs : List (Html.Attribute msg)
-                attrs =
-                    maybeAlignment
-                        |> Maybe.map
-                            (\alignment ->
-                                case alignment of
-                                    Block.AlignLeft ->
-                                        "left"
-
-                                    Block.AlignCenter ->
-                                        "center"
-
-                                    Block.AlignRight ->
-                                        "right"
-                            )
-                        |> Maybe.map Attributes.align
-                        |> Maybe.map List.singleton
-                        |> Maybe.withDefault []
-            in
-            Html.th attrs
+            Html.th
+                [ css
+                    [ padding (px 15)
+                    , textAlign center
+                    , fontWeight normal
+                    , border3 (px 1) solid (hsla 0 0 1 0.8)
+                    ]
+                ]
     , tableCell =
         \maybeAlignment ->
-            let
-                attrs : List (Html.Attribute msg)
-                attrs =
-                    maybeAlignment
-                        |> Maybe.map
-                            (\alignment ->
-                                case alignment of
-                                    Block.AlignLeft ->
-                                        "left"
-
-                                    Block.AlignCenter ->
-                                        "center"
-
-                                    Block.AlignRight ->
-                                        "right"
-                            )
-                        |> Maybe.map Attributes.align
-                        |> Maybe.map List.singleton
-                        |> Maybe.withDefault []
-            in
-            Html.td attrs
+            Html.td
+                [ css
+                    [ padding (px 15)
+                    , textAlign center
+                    , border3 (px 1) solid (hsla 0 0 1 0.8)
+                    ]
+                ]
     }
 
 
