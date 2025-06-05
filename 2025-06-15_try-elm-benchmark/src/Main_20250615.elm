@@ -280,8 +280,7 @@ fizzBuzz n =
 
         ( _, 0 ) -> "Buzz"
 
-        _ -> String.fromInt n
-"""
+        _ -> String.fromInt n"""
         ]
 
 
@@ -292,13 +291,9 @@ elmBenchmark_benchmark =
         , title = "ベンチマーク測定の様子"
         }
         [ Custom.benchmark <|
-            Benchmark.describe "FizzBuzz"
-                [ Benchmark.describe "fizzBuzz"
-                    [ Benchmark.benchmark "from the beginning" <|
-                        \_ -> fizzBuzz 100
-                    , Benchmark.benchmark "from the end" <|
-                        \_ -> fizzBuzz 1000
-                    ]
+            Benchmark.describe "fizzBuzz"
+                [ Benchmark.benchmark "from the beginning" <|
+                    \_ -> fizzBuzz 100
                 ]
         ]
 
