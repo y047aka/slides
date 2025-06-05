@@ -26,7 +26,17 @@ page : PageHeader -> List (Content model msg) -> List (Content model msg)
 page props contents =
     [ container
         (List.map Html.fromUnstyled
-            >> div [ css [ height (pct 100) ] ]
+            >> div
+                [ css
+                    [ height (pct 100)
+                    , padding (em 0.8)
+                    , displayFlex
+                    , flexDirection column
+                    , property "row-gap" "0.8em"
+                    , backgroundColor (hsl 200 1 0.4)
+                    , Css.color (hsl 0 0 1)
+                    ]
+                ]
             >> Html.toUnstyled
         )
         (pageHeader props :: contents)
@@ -101,8 +111,7 @@ pageHeader props =
         Html.toUnstyled <|
             header
                 [ css
-                    [ padding (em 0.8)
-                    , displayFlex
+                    [ displayFlex
                     , flexDirection column
                     , property "row-gap" "1rem"
                     , children
@@ -111,9 +120,9 @@ pageHeader props =
                         ]
                     ]
                 ]
-                [ div [ css [ fontSize (rem 2), fontWeight bold ] ]
+                [ div [ css [ fontSize (em 0.6), fontWeight bold ] ]
                     [ text props.chapter ]
-                , h1 [ css [ fontSize (rem 3), fontWeight normal ] ]
+                , h1 [ css [ fontSize (em 0.8), fontWeight normal ] ]
                     [ text props.title ]
                 ]
 
@@ -175,7 +184,7 @@ markdown markdownStr =
 markdownPage : String -> Content model msg
 markdownPage markdownStr =
     markdown markdownStr
-        |> div []
+        |> div [ css [ padding2 zero (em 2) ] ]
         |> Html.toUnstyled
         |> item
 
@@ -189,7 +198,14 @@ customizedHtmlRenderer =
                     Html.h1 [ css [ margin zero, fontSize (em 1.4) ] ] children
 
                 Block.H2 ->
-                    Html.h2 [ css [ margin2 (em 0.6) zero, fontSize (em 1) ] ] children
+                    Html.h2
+                        [ css
+                            [ fontSize (em 1)
+                            , fontWeight normal
+                            , nthOfType "n+2" [ margin3 (em 1.8) zero zero ]
+                            ]
+                        ]
+                        children
 
                 Block.H3 ->
                     Html.h3 [] children
