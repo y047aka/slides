@@ -74,6 +74,7 @@ image w h url =
                 [ src url
                 , Attributes.width w
                 , Attributes.height h
+                , css [ maxWidth (pct 100), borderRadius (px 10) ]
                 ]
                 []
 
@@ -407,7 +408,8 @@ highlightElm code =
         Html.toUnstyled <|
             case elm code of
                 Ok highlighted ->
-                    Html.fromUnstyled (toBlockHtml (Just 1) highlighted)
+                    div [ css [ overflow hidden, borderRadius (px 10) ] ]
+                        [ Html.fromUnstyled (toBlockHtml (Just 1) highlighted) ]
 
                 Err _ ->
                     Html.pre [] [ Html.code [] [ text code ] ]

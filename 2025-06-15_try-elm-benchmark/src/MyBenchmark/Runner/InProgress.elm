@@ -16,7 +16,6 @@ view : Report -> Element Class variation msg
 view report =
     report
         |> progressBars []
-        |> (::) (Text.hero TextClass "Benchmarks Running")
         |> column Unstyled []
 
 

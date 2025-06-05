@@ -19,7 +19,6 @@ view : Report -> Element Class Variation msg
 view report_ =
     report_
         |> reports []
-        |> (::) (Text.hero TextClass "Benchmark Report")
         |> column Unstyled []
 
 
