@@ -11,7 +11,7 @@ import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
-import Formatting.Styled as Formatting exposing (background, colored, highlightCode, highlightElm, markdown, markdownPage, pageHeader, spacer)
+import Formatting.Styled as Formatting exposing (background, colored, highlightCode, highlightElm, image, markdown, markdownPage, pageHeader, spacer)
 import Html.Styled as Html exposing (br, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
@@ -46,9 +46,10 @@ slides =
     , elmBenchmark_overview
     , elmBenchmark_example
     , elmBenchmark_benchmark
-    , sampleData
 
-    -- 最初の実装
+    -- elm-motorsport-analysis
+    , elmMotorsportAnalysis
+    , sampleData
     , oldCode_workflow
     , oldCode_benchmark
 
@@ -309,10 +310,20 @@ fizzBuzz n =
             String.fromInt n
 
 
+elmMotorsportAnalysis : List Content
+elmMotorsportAnalysis =
+    [ pageHeader
+        { chapter = "今回の題材"
+        , title = "elm-motorsport-analysis"
+        }
+    , image 1280 720 "assets/images/elm_motorsport_analysis.png"
+    ]
+
+
 sampleData : List Content
 sampleData =
     [ pageHeader
-        { chapter = "検証用サンプルデータ"
+        { chapter = "elm-motorsport-analysis"
         , title = "ル・マン24時間レース（2024年）の走行データ"
         }
     , highlightCode """NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LINE_IN_PIT; S1; S1_IMPROVEMENT; S2; S2_IMPROVEMENT; S3; S3_IMPROVEMENT; KPH; ELAPSED; HOUR;S1_LARGE;S2_LARGE;S3_LARGE;TOP_SPEED;DRIVER_NAME;PIT_TIME;CLASS;GROUP;TEAM;MANUFACTURER;FLAG_AT_FL;S1_SECONDS;S2_SECONDS;S3_SECONDS;
@@ -335,7 +346,7 @@ sampleData =
 oldCode_workflow : List Content
 oldCode_workflow =
     [ pageHeader
-        { chapter = "最初の実装"
+        { chapter = "elm-motorsport-analysis"
         , title = "CSVをパースし、周回データとしてデコード"
         }
     , markdownPage """
@@ -361,7 +372,7 @@ preprocess laps =
 oldCode_benchmark : List Content
 oldCode_benchmark =
     [ pageHeader
-        { chapter = "最初の実装"
+        { chapter = "elm-motorsport-analysis"
         , title = "ベンチマーク"
         }
     , Custom.benchmark <|

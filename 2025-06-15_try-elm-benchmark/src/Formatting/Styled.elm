@@ -45,14 +45,16 @@ spacer h =
     div [ css [ Css.height (px (toFloat h)) ] ] []
 
 
-image : Int -> Int -> String -> Html msg
+image : Int -> Int -> String -> Content model msg
 image w h url =
-    img
-        [ src url
-        , Attributes.width w
-        , Attributes.height h
-        ]
-        []
+    item <|
+        Html.toUnstyled <|
+            img
+                [ src url
+                , Attributes.width w
+                , Attributes.height h
+                ]
+                []
 
 
 colored : String -> String -> List (Html msg) -> Content model msg
