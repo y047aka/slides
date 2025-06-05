@@ -33,64 +33,61 @@ main =
 
 slides : List (List Content)
 slides =
-    [ cover
+    List.concat
+        [ [ cover
 
-    -- はじめに
-    , introduction
-    , elmIntro
-    , motivation
-    , benchmark_basics
-    , benchmark_considerations
-
-    -- elm-explorations/benchmark
-    , elmBenchmark_overview
-    , elmBenchmark_example
-    , elmBenchmark_benchmark
-
-    -- elm-motorsport-analysis
-    , elmMotorsportAnalysis
-    , sampleData
-    , oldCode_workflow
-    , oldCode_benchmark
-
-    -- 検証用サンプルデータ
-    , optimization_ideas
-
-    -- 改善① List を Array に置き換える
-    , replaceWithArray_overview
-    , replaceWithArray_study
-    , replaceWithArray_code
-    , replaceWithArray_benchmark
-    , replaceWithArray_result
-
-    -- 改善② AssocList を Dict に置き換える
-    , replaceWithDict_overview
-    , replaceWithDict_comparison
-    , replaceWithDict_code
-    , replaceWithDict_ordersByLap_benchmark
-    , replaceWithDict_preprocessHelper_benchmark
-
-    -- 改善③ 計算ロジックを改良する
-    , improve_logic_overview
-    , improve_logic_code_old
-    , improve_logic_code
-    , improve_logic_laps_benchmark
-    , improve_logic_preprocessHelper_benchmark
-    , improve_logic_benchmark
-
-    -- 改善④ 入力データ形式の変更
-    , replaceWithJson_overview
-    , replaceWithJson_benchmark
-
-    -- 改善⑤ その他の選択肢
-    , cli
-
-    -- ベンチマークから得られた知見
-    , lessonsLearned
-
-    -- まとめ
-    , conclusion
-    ]
+          -- はじめに
+          , introduction
+          , elmIntro
+          , motivation
+          , benchmark_basics
+          , benchmark_considerations
+          ]
+        , chapter "elm-explorations/benchmark"
+            [ elmBenchmark_overview
+            , elmBenchmark_example
+            , elmBenchmark_benchmark
+            ]
+        , chapter "elm-motorsport-analysis"
+            [ elmMotorsportAnalysis
+            , sampleData
+            , oldCode_workflow
+            , oldCode_benchmark
+            ]
+        , chapter "パフォーマンス改善の計画"
+            [ optimization_ideas ]
+        , chapter "改善① List を Array に置き換える"
+            [ replaceWithArray_overview
+            , replaceWithArray_study
+            , replaceWithArray_code
+            , replaceWithArray_benchmark
+            , replaceWithArray_result
+            ]
+        , chapter "改善② AssocList を Dict に置き換える"
+            [ replaceWithDict_overview
+            , replaceWithDict_comparison
+            , replaceWithDict_code
+            , replaceWithDict_ordersByLap_benchmark
+            , replaceWithDict_preprocessHelper_benchmark
+            ]
+        , chapter "改善③ 計算ロジックを改良する"
+            [ improve_logic_overview
+            , improve_logic_code_old
+            , improve_logic_code
+            , improve_logic_laps_benchmark
+            , improve_logic_preprocessHelper_benchmark
+            , improve_logic_benchmark
+            ]
+        , chapter "改善④ 入力データ形式の変更"
+            [ replaceWithJson_overview
+            , replaceWithJson_benchmark
+            ]
+        , chapter "改善⑤ その他の選択肢"
+            [ cli ]
+        , chapter "ベンチマークから得られた知見"
+            [ lessonsLearned ]
+        , [ conclusion ]
+        ]
 
 
 cover : List Content
@@ -137,6 +134,30 @@ cover =
             ]
         ]
     ]
+
+
+chapter : String -> List (List Content) -> List (List Content)
+chapter titleText contents =
+    [ colored "#222" "#fff" <|
+        [ div
+            [ css
+                [ height (pct 100)
+                , property "display" "grid"
+                , property "place-items" "center"
+                ]
+            ]
+            [ h1
+                [ css
+                    [ textAlign center
+                    , fontSize (em 1.5)
+                    , fontWeight bold
+                    ]
+                ]
+                [ text titleText ]
+            ]
+        ]
+    ]
+        :: contents
 
 
 introduction : List Content
