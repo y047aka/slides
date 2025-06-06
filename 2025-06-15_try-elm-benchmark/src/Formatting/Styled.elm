@@ -33,8 +33,8 @@ page props contents =
                     , displayFlex
                     , flexDirection column
                     , property "row-gap" "0.8em"
-                    , backgroundColor (hsl 200 1 0.4)
-                    , Css.color (hsl 0 0 1)
+                    , backgroundColor (hsl 200 0.1 0.85)
+                    , Css.color (hsl 0 0 0.2)
                     ]
                 ]
             >> Html.toUnstyled
@@ -370,7 +370,7 @@ customizedHtmlRenderer =
                     [ padding (px 15)
                     , textAlign center
                     , fontWeight normal
-                    , border3 (px 1) solid (hsla 0 0 1 0.8)
+                    , border3 (px 1) solid (hsl 0 0 0.2)
                     ]
                 ]
     , tableCell =
@@ -379,7 +379,7 @@ customizedHtmlRenderer =
                 [ css
                     [ padding (px 15)
                     , textAlign center
-                    , border3 (px 1) solid (hsla 0 0 1 0.8)
+                    , border3 (px 1) solid (hsl 0 0 0.2)
                     ]
                 ]
     }
