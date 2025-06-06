@@ -9,7 +9,7 @@ import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer exposing (Renderer)
 import SliceShow.Content exposing (Content, container, item)
-import SyntaxHighlight exposing (elm, noLang, toBlockHtml)
+import SyntaxHighlight exposing (HCode, elm, noLang, toBlockHtml)
 
 
 slidePadding : Css.Style
@@ -387,14 +387,14 @@ customizedHtmlRenderer =
 
 {-| Elmコードのシンタックスハイライト表示用ヘルパー関数
 -}
-highlightElm : String -> Content model msg
-highlightElm code =
+highlightElm : (HCode -> HCode) -> String -> Content model msg
+highlightElm f code =
     item <|
         Html.toUnstyled <|
             case elm code of
                 Ok highlighted ->
                     div [ css [ overflow hidden, borderRadius (px 10) ] ]
-                        [ Html.fromUnstyled (toBlockHtml (Just 1) highlighted) ]
+                        [ Html.fromUnstyled (toBlockHtml (Just 1) (f highlighted)) ]
 
                 Err _ ->
                     Html.pre [] [ Html.code [] [ text code ] ]

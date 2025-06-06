@@ -19,6 +19,7 @@ import Json.Decode as JD
 import MyBenchmark as Benchmark
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
 import SliceShow.Slide exposing (setDimensions, slide)
+import SyntaxHighlight exposing (Highlight(..), highlightLines)
 
 
 main : Program () (Model Custom.Model Msg) (Message Msg)
@@ -292,7 +293,7 @@ elmBenchmark_example =
         { chapter = "elm-explorations/benchmark"
         , title = "使用例"
         }
-        [ highlightElm """import Benchmark exposing (..)
+        [ highlightElm identity """import Benchmark exposing (..)
 
 suite : Benchmark
 suite =
@@ -350,7 +351,7 @@ sampleData =
         { chapter = "elm-motorsport-analysis"
         , title = "ル・マン24時間レース（2024年）の走行データ"
         }
-        [ highlightElm """NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LINE_IN_PIT; S1; S1_IMPROVEMENT; S2; S2_IMPROVEMENT; S3; S3_IMPROVEMENT; KPH; ELAPSED; HOUR;S1_LARGE;S2_LARGE;S3_LARGE;TOP_SPEED;DRIVER_NAME;PIT_TIME;CLASS;GROUP;TEAM;MANUFACTURER;FLAG_AT_FL;S1_SECONDS;S2_SECONDS;S3_SECONDS;
+        [ highlightElm identity """NUMBER; DRIVER_NUMBER; LAP_NUMBER; LAP_TIME; LAP_IMPROVEMENT; CROSSING_FINISH_LINE_IN_PIT; S1; S1_IMPROVEMENT; S2; S2_IMPROVEMENT; S3; S3_IMPROVEMENT; KPH; ELAPSED; HOUR;S1_LARGE;S2_LARGE;S3_LARGE;TOP_SPEED;DRIVER_NAME;PIT_TIME;CLASS;GROUP;TEAM;MANUFACTURER;FLAG_AT_FL;S1_SECONDS;S2_SECONDS;S3_SECONDS;
 10;2;1;3:53.276;0;;45.985;0;1:26.214;0;1:41.077;0;208.1;3:53.276;16:04:19.878;0:45.985;1:26.214;1:41.077;316.3;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;45.985;86.214;101.077;
 10;2;2;3:39.529;0;;34.734;0;1:24.901;0;1:39.894;0;223.4;7:32.805;16:07:59.407;0:34.734;1:24.901;1:39.894;315.4;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.734;84.901;99.894;
 10;2;3;3:39.240;2;;34.715;0;1:24.814;0;1:39.711;0;223.7;11:12.045;16:11:38.647;0:34.715;1:24.814;1:39.711;313.6;Patrick PILET;;LMP2;;Vector Sport;Oreca;GF;34.715;84.814;99.711;
@@ -376,7 +377,7 @@ oldCode_workflow =
         [ markdownPage """
 - 周回データを解析し、車両単位で再構成
 """
-        , highlightElm """preprocess : List Lap -> List Car
+        , highlightElm identity """preprocess : List Lap -> List Car
 preprocess laps =
     laps
         |> AssocList.Extra.groupBy .carNumber
@@ -455,7 +456,7 @@ replaceWithArray_overview =
 - Listは線形検索、Arrayはインデックスアクセスに強い
 - 1万行以上のデータを扱うので、Arrayの優位性を体感できそう
 """
-        , highlightElm """{-| スタート時の各車両の順位を求める関数
+        , highlightElm identity """{-| スタート時の各車両の順位を求める関数
     暫定的に1周目の通過タイムの早かった順で代用している
 -}
 startPositions : List Lap -> List String
@@ -509,11 +510,19 @@ replaceWithArray_code =
         { chapter = "改善① List を Array に置き換える"
         , title = "実装の変更"
         }
-        [ highlightElm """{-| スタート時の各車両の順位を求める関数
+        [ highlightElm
+            (highlightLines (Just Del) 3 4
+                >> highlightLines (Just Add) 4 5
+                >> highlightLines (Just Del) 6 7
+                >> highlightLines (Just Add) 7 9
+            )
+            """{-| スタート時の各車両の順位を求める関数
     暫定的に1周目の通過タイムの早かった順で代用している
 -}
+startPositions : List Lap -> List String
 startPositions : Array Wec.Lap -> List String
 startPositions laps =
+    List.filter (\\{ lapNumber } -> lapNumber == 1) laps
     Array.filter (\\{ lapNumber } -> lapNumber == 1) laps
         |> Array.toList
         |> List.sortBy .elapsed
@@ -644,11 +653,14 @@ replaceWithDict_code =
         { chapter = "改善② AssocList を Dict に置き換える"
         , title = "実装の変更"
         }
-        [ highlightElm """{-| 各周回での各車両の順位を求める関数
+        [ highlightElm (highlightLines (Just Add) 7 9 >> highlightLines (Just Del) 5 7)
+            """{-| 各周回での各車両の順位を求める関数
 -}
 ordersByLap_dict : List Wec.Lap -> OrdersByLap
 ordersByLap_dict laps =
     laps
+        |> AssocList.Extra.groupBy .lapNumber
+        |> AssocList.toList
         |> Dict.Extra.groupBy .lapNumber
         |> Dict.toList
         |> List.map
@@ -751,7 +763,7 @@ improve_logic_code_old =
         { chapter = "改善③ 計算ロジックを改良する"
         , title = "実装の変更"
         }
-        [ highlightElm """laps_old : { carNumber : String, laps : List Wec.Lap } -> List Lap
+        [ highlightElm identity """laps_old : { carNumber : String, laps : List Wec.Lap } -> List Lap
 laps_old { carNumber, laps } =
     laps
         |> List.indexedMap
@@ -786,7 +798,7 @@ improve_logic_code =
         { chapter = "改善③ 計算ロジックを改良する"
         , title = "実装の変更"
         }
-        [ highlightElm """laps_improved : { carNumber : String, laps : List Wec.Lap } -> List Lap
+        [ highlightElm identity """laps_improved : { carNumber : String, laps : List Wec.Lap } -> List Lap
 laps_improved { carNumber, laps } =
     let
         step : Wec.Lap -> Acc -> Acc
@@ -906,7 +918,7 @@ replaceWithJson_overview =
 - JSONデコードに変更した実装
 - パフォーマンスへの影響
 """
-        , highlightElm """import Json.Decode as Decode
+        , highlightElm identity """import Json.Decode as Decode
 
 jsonDecoder : Decode.Decoder CsvData
 jsonDecoder =
