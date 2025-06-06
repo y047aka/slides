@@ -71,7 +71,6 @@ slides =
         , chapter "改善② AssocList を Dict に置き換える"
             "P1002442.jpeg"
             [ replaceWithDict_overview
-            , replaceWithDict_comparison
             , replaceWithDict_code
             , replaceWithDict_ordersByLap_benchmark
             , replaceWithDict_preprocessHelper_benchmark
@@ -625,29 +624,11 @@ replaceWithDict_overview =
         , title = "概要"
         }
         [ markdownPage """
-## 課題
+- AssocListを使用しているため、検索に線形時間（O(n)）が必要
+    - データ量が増えると処理時間が比例して増加してしまう
+- Dictを使用して検索を定数時間（O(1)）に改善したい
+<br />
 
-- AssocListを使用しているため、検索に線形時間が必要
-- データ量が増えると処理時間が比例して増加
-
-## 改善の方針
-
-- Dictを使用して検索を定数時間に改善
-
-## 期待される効果
-
-- 大規模データでの処理速度の向上
-"""
-        ]
-
-
-replaceWithDict_comparison : List Content
-replaceWithDict_comparison =
-    page
-        { chapter = "改善② AssocList を Dict に置き換える"
-        , title = "AssocList と Dictの比較"
-        }
-        [ markdownPage """
 | | AssocList | Dict |
 | --- | --- | --- |
 | 実装 | キーと値のペアをリストで管理<br />（任意の型をキーにできる） | ハッシュベースの実装                   |
