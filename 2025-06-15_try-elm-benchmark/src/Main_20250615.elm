@@ -1,6 +1,7 @@
 module Main_20250615 exposing (main)
 
 import Array exposing (Array)
+import Array.Extra2
 import Css exposing (..)
 import Csv.Decode as CD exposing (FieldNames(..))
 import Custom exposing (Content, Msg)
@@ -64,7 +65,8 @@ slides =
             , replaceWithArray_study
             , replaceWithArray_code
             , replaceWithArray_benchmark
-            , replaceWithArray_result
+            , replaceWithArray_sortBy
+            , replaceWithArray_sortBy_benchmark
             ]
         , chapter "改善② AssocList を Dict に置き換える"
             "P1002442.jpeg"
@@ -485,20 +487,13 @@ replaceWithArray_study =
                     )
                 , Benchmark.scale "Array.length"
                     ([ 5 -- 274,508,871 runs/s (GoF: 99.61%)
-                     , 5000 -- 274,955,086 runs/s (GoF: 99.67%)
+                     , 50
+                     , 500
+
+                     --  , 5000 -- 274,955,086 runs/s (GoF: 99.67%)
                      ]
                         |> List.map (\size -> ( size, Array.fromList (Fixture.csvDecodedOfSize size) ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Array.length target ))
-                    )
-                , Benchmark.scale "Array.fromList >> Array.length"
-                    ([ 5 -- 18,625,505 runs/s (GoF: 99.96%)
-                     , 50 -- 4,904,676 runs/s (GoF: 99.97%)
-                     , 500 -- 856,094 runs/s (GoF: 99.95%)
-
-                     --  , 5000 -- 84,065 runs/s (GoF: 99.79%)
-                     ]
-                        |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
-                        |> List.map (\( size, target ) -> ( toString size, \_ -> (Array.fromList >> Array.length) target ))
                     )
                 ]
         ]
@@ -524,13 +519,6 @@ startPositions laps =
         |> Array.toList
         |> List.sortBy .elapsed
         |> List.map .carNumber"""
-        , markdownPage """
-## 困ったこと
-
-- Arrayを操作する関数があまり提供されていない
-    - そのため、ArrayをListに変換する処理を挟むことになる
-    - その場合にも若干のパフォーマンス向上はありそうだけど...
-"""
         ]
 
 
@@ -551,43 +539,83 @@ replaceWithArray_benchmark =
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.startPositions_list target ))
                     )
-                , Benchmark.scale "Array"
+                , Benchmark.scale " Listに変換して List.sortBy"
                     ([ 5 -- 3,936,471 runs/s (GoF: 99.95%)
                      , 50 -- 1,500,727 runs/s (GoF: 99.97%)
                      , 500 -- 230,693 runs/s (GoF: 99.96%)
                      , 5000 -- 22,697 runs/s (GoF: 99.96%)
                      ]
-                        |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
-                        |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_array (Array.fromList target) ))
+                        |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size |> Array.fromList ))
+                        |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_tmp target ))
                     )
                 ]
         ]
 
 
-startPositions_array : Array Wec.Lap -> List String
-startPositions_array laps =
+startPositions_tmp : Array Wec.Lap -> List String
+startPositions_tmp laps =
     Array.filter (\{ lapNumber } -> lapNumber == 1) laps
         |> Array.toList
         |> List.sortBy .elapsed
         |> List.map .carNumber
 
 
-replaceWithArray_result : List Content
-replaceWithArray_result =
+replaceWithArray_sortBy : List Content
+replaceWithArray_sortBy =
     page
         { chapter = "改善① List を Array に置き換える"
-        , title = "結果"
+        , title = "余談：Array.sortBy 関数を自作してみる"
         }
         [ markdownPage """
 ## 困ったこと
 
 - Arrayを操作する関数があまり提供されていない
+    - そのため、ArrayをListに変換する処理を挟むことになる
+- `Array`型のみでソートを実現した場合のパフォーマンスが気になる
 
-## 解決策
+## 実装の成果
 
-- Arrayを操作する関数を自作する
+- マージソートによる `Array.Extra2.sortBy` 関数を試作した
+- List.sortByと同等のパフォーマンスは得られたものの、`List` に変換してソートするほうが早いという結果になった
 """
         ]
+
+
+replaceWithArray_sortBy_benchmark : List Content
+replaceWithArray_sortBy_benchmark =
+    page
+        { chapter = "改善① List を Array に置き換える"
+        , title = "ベンチマーク：startPositions"
+        }
+        [ Custom.benchmark <|
+            Benchmark.describe "startPositions"
+                [ Benchmark.scale "Listに変換して List.sortBy"
+                    ([ 5 -- 3,936,471 runs/s (GoF: 99.95%)
+                     , 50 -- 1,500,727 runs/s (GoF: 99.97%)
+                     , 500 -- 230,693 runs/s (GoF: 99.96%)
+                     , 5000 -- 22,697 runs/s (GoF: 99.96%)
+                     ]
+                        |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size |> Array.fromList ))
+                        |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_tmp target ))
+                    )
+                , Benchmark.scale "Array.Extra2.sortBy"
+                    ([ 5 -- 3,936,471 runs/s (GoF: 99.95%)
+                     , 50 -- 1,500,727 runs/s (GoF: 99.97%)
+                     , 500 -- 230,693 runs/s (GoF: 99.96%)
+                     , 5000 -- 22,697 runs/s (GoF: 99.96%)
+                     ]
+                        |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size |> Array.fromList ))
+                        |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_array target ))
+                    )
+                ]
+        ]
+
+
+startPositions_array : Array Wec.Lap -> Array String
+startPositions_array laps =
+    Array.filter (\{ lapNumber } -> lapNumber == 1) laps
+        |> Array.Extra2.sortBy .elapsed
+        |> Array.map .carNumber
 
 
 replaceWithDict_overview : List Content
@@ -973,18 +1001,29 @@ lessonsLearned =
         , title = "データ構造・パフォーマンス・実務応用"
         }
         [ markdownPage """
+## パフォーマンス最適化の原則
 
-## パフォーマンス問題の主な種類
+- **測定してから最適化**: 推測より実測が重要
+- **段階的改善**: 小さな変更を積み重ねて効果を確認
+- **適切なデータ構造の選択**: List、Array、Dictの使い分け
 
-- 初期化時間の遅さ (大量データの初期ロード)
-- 更新処理の遅さ (Updateサイクルの最適化)
-- 描画の遅さ (DOM操作の最小化)
+## 実装から得た教訓
+
+- **実測の価値**: ベンチマークで予想外の結果を発見
+- **シンプルさの力**: 理解しやすい実装の重要性
+- **プラットフォーム理解**: ElmとJavaScript VMの特性把握
 
 ## The Elm Architectureでの最適化
 
 - Html.Lazy, Html.Keyed の活用
 - モデル設計の見直し
 - データ構造の選択
+
+## 自作実装の価値
+
+- **教育効果**: 内部動作の深い理解
+- **カスタマイズ性**: 特定用途への最適化
+- **学習機会**: 関数型プログラミングの実践
 """
         ]
 
@@ -995,10 +1034,23 @@ conclusion =
         (markdown """
 # まとめ
 
-- 検証結果の総括: 適切な最適化で大幅な改善が可能
-- 効果的な最適化アプローチ
-- 測定してから最適化することの重要性
-- 今後の展望
+## 主な成果
+
+- **Array専用ソート**: List型を使わない完全なArray実装を実現
+- **複数アルゴリズム検証**: ヒープソート、マージソート、クイックソートを比較
+- **実測による発見**: 理論と実践の違いを体験
+
+## 効果的な最適化アプローチ
+
+- 段階的な改善: List → Array → Dict → ロジック改善
+- 測定主導の開発: ベンチマークで効果を確認
+- シンプルさの価値: 可読性とパフォーマンスのバランス
+
+## 今後の展望
+
+- より大規模データでの検証
+- WebWorkersやWebAssemblyとの比較
+- 実用アプリケーションでの活用
 
 [サンプルコードとベンチマーク結果](https://github.com/y047aka/elm-benchmark-example)
 """)
