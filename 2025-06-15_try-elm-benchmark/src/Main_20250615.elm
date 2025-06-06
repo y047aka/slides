@@ -11,7 +11,7 @@ import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
-import Formatting.Styled as Formatting exposing (background, colored, highlightElm, image, markdown, markdownPage, page, spacer)
+import Formatting.Styled as Formatting exposing (background, colored, highlightElm, markdown, markdownPage, page, spacer)
 import Html.Styled as Html exposing (br, div, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
@@ -44,19 +44,22 @@ slides =
           , benchmark_considerations
           ]
         , chapter "elm-explorations/benchmark"
+            "P1001668.jpeg"
             [ elmBenchmark_overview
             , elmBenchmark_example
             , elmBenchmark_benchmark
             ]
         , chapter "elm-motorsport-analysis"
-            [ elmMotorsportAnalysis
-            , sampleData
+            "elm_motorsport_analysis.png"
+            [ sampleData
             , oldCode_workflow
             , oldCode_benchmark
             ]
         , chapter "パフォーマンス改善の計画"
+            "P1001938.jpeg"
             [ optimization_ideas ]
         , chapter "改善① List を Array に置き換える"
+            "P1002085.jpeg"
             [ replaceWithArray_overview
             , replaceWithArray_study
             , replaceWithArray_code
@@ -64,6 +67,7 @@ slides =
             , replaceWithArray_result
             ]
         , chapter "改善② AssocList を Dict に置き換える"
+            "P1002442.jpeg"
             [ replaceWithDict_overview
             , replaceWithDict_comparison
             , replaceWithDict_code
@@ -71,6 +75,7 @@ slides =
             , replaceWithDict_preprocessHelper_benchmark
             ]
         , chapter "改善③ 計算ロジックを改良する"
+            "P1002755.jpeg"
             [ improve_logic_overview
             , improve_logic_code_old
             , improve_logic_code
@@ -79,12 +84,15 @@ slides =
             , improve_logic_benchmark
             ]
         , chapter "改善④ 入力データ形式の変更"
+            "P1003304.jpeg"
             [ replaceWithJson_overview
             , replaceWithJson_benchmark
             ]
         , chapter "改善⑤ その他の選択肢"
+            "P1002574.jpeg"
             [ cli ]
         , chapter "ベンチマークから得られた知見"
+            ""
             [ lessonsLearned ]
         , [ conclusion ]
         ]
@@ -136,9 +144,9 @@ cover =
     ]
 
 
-chapter : String -> List (List Content) -> List (List Content)
-chapter titleText contents =
-    [ colored "#222" "#fff" <|
+chapter : String -> String -> List (List Content) -> List (List Content)
+chapter titleText bgImagePath contents =
+    [ background ("assets/images/2025-06-15_try-elm-benchmark/" ++ bgImagePath)
         [ div
             [ css
                 [ height (pct 100)
@@ -333,16 +341,6 @@ fizzBuzz n =
 
         _ ->
             String.fromInt n
-
-
-elmMotorsportAnalysis : List Content
-elmMotorsportAnalysis =
-    page
-        { chapter = "今回の題材"
-        , title = "elm-motorsport-analysis"
-        }
-        [ image 1280 720 "assets/images/elm_motorsport_analysis.png"
-        ]
 
 
 sampleData : List Content

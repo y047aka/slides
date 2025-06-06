@@ -52,10 +52,13 @@ background url children =
                     [ Css.height (pct 100)
                     , boxSizing borderBox
                     , padding3 (px 10) (px 100) (px 20)
-                    , backgroundImage (Css.url url)
+                    , backgroundColor (hex "222")
+                    , Css.property "background-image"
+                        ("linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('" ++ url ++ "')")
                     , backgroundSize Css.cover
+                    , backgroundPosition center
+                    , backgroundRepeat noRepeat
                     , Css.color (hex "FFF")
-                    , textShadow4 zero zero (px 50) (hex "000")
                     ]
                 ]
                 children
