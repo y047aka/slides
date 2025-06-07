@@ -205,7 +205,6 @@ customizedHtmlRenderer =
                     Html.h2
                         [ css
                             [ fontSize (em 1)
-                            , fontWeight normal
                             , nthOfType "n+2" [ margin3 (em 1.8) zero zero ]
                             ]
                         ]
