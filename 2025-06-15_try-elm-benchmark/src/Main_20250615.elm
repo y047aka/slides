@@ -40,8 +40,8 @@ slides =
 
           -- はじめに
           , introduction
-          , elmIntro
           , motivation
+          , elmIntro
           , benchmark_basics
           , benchmark_considerations
           ]
