@@ -276,6 +276,7 @@ elmBenchmark_overview =
 ## 測定環境の統一
 
 - 測定前にJITコンパイルを強制する（Warming JIT）
+    - 最適化されたものを使うように
 
 ## 統計的な有意性
 
@@ -520,7 +521,7 @@ replaceWithArray_code =
     暫定的に1周目の通過タイムの早かった順で代用している
 -}
 startPositions : List Lap -> List String
-startPositions : Array Wec.Lap -> List String
+startPositions : Array WecLap -> List String
 startPositions laps =
     List.filter (\\{ lapNumber } -> lapNumber == 1) laps
     Array.filter (\\{ lapNumber } -> lapNumber == 1) laps
@@ -583,7 +584,7 @@ replaceWithArray_sortBy =
 
 ## 実装の成果
 
-- マージソートによる `Array.Extra2.sortBy` 関数を試作した
+- マージソートによる `sortBy` 関数を試作した
 - List.sortByと同等のパフォーマンスは得られたものの、`List` に変換してソートするほうが早いという結果になった
 """
         ]
@@ -642,7 +643,6 @@ replaceWithDict_overview =
 | --- | --- | --- |
 | 実装 | キーと値のペアをリストで管理<br />（任意の型をキーにできる） | ハッシュベースの実装                   |
 | 検索速度 | （O(n)）<br />線形検索が必要 | （O(1)）<br />定数時間でのアクセスが可能 |
-| メモリ使用量 | 少ない | 多い |
 """
         ]
 
@@ -767,24 +767,12 @@ improve_logic_code_old =
 laps_old { carNumber, laps } =
     laps
         |> List.indexedMap
-            (\\index { s1, s2, s3 } ->
+            (\\index { lapTime } ->
                 { ...
-                , s1_best =
+                , best =
                     laps
                         |> List.take (index + 1)
-                        |> List.filterMap .s1
-                        |> List.minimum
-                        |> Maybe.withDefault 0
-                , s2_best =
-                    laps
-                        |> List.take (index + 1)
-                        |> List.filterMap .s2
-                        |> List.minimum
-                        |> Maybe.withDefault 0
-                , s3_best =
-                    laps
-                        |> List.take (index + 1)
-                        |> List.filterMap .s3
+                        |> List.map .lapTime
                         |> List.minimum
                         |> Maybe.withDefault 0
                 }
@@ -798,24 +786,16 @@ improve_logic_code =
         { chapter = "改善③ 計算ロジックを改良する"
         , title = "実装の変更"
         }
-        [ highlightElm identity """laps_improved : { carNumber : String, laps : List Wec.Lap } -> List Lap
+        [ highlightElm identity """laps_improved : { carNumber : String, laps : List WecLap } -> List Lap
 laps_improved { carNumber, laps } =
     let
         step : Wec.Lap -> Acc -> Acc
-        step { s1, s2, s3 } acc =
+        step { lapTime } acc =
             let
-                ( bestS1, bestS2, bestS3 ) =
-                    ( List.minimum (List.filterMap identity [ s1, acc.bestS1 ])
-                    , List.minimum (List.filterMap identity [ s2, acc.bestS2 ])
-                    , List.minimum (List.filterMap identity [ s3, acc.bestS3 ])
-                    )
-
-                currentLap =
-                    ...
+                bestLapTime =
+                    List.minimum (lapTime :: acc.bestLapTime)
             in
-            { bestS1 = bestS1
-            , bestS2 = bestS2
-            , bestS3 = bestS3
+            { bestLapTime = bestLapTime
             , laps = currentLap :: acc.laps
             }
     in
