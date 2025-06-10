@@ -42,14 +42,11 @@ slides =
           , introduction
           , motivation
           , elmTagCloud
-          , benchmark_basics
-          , benchmark_considerations
           ]
-        , chapter "elm-explorations/benchmark"
+        , chapter "ベンチマーク測定の方法"
             "P1001668.jpeg"
-            [ elmBenchmark_overview
-            , elmBenchmark_example
-            , elmBenchmark_benchmark
+            [ benchmark_overview
+            , elmBenchmark
             ]
         , chapter "elm-motorsport-analysis"
             "elm_motorsport_analysis.png"
@@ -239,11 +236,11 @@ motivation =
         ]
 
 
-benchmark_basics : List Content
-benchmark_basics =
+benchmark_overview : List Content
+benchmark_overview =
     page
-        { chapter = "はじめに"
-        , title = "ベンチマークテストの概要"
+        { chapter = "ベンチマーク測定の方法"
+        , title = "概要"
         }
         [ markdownPage """
 ## ベンチマークテストの目的
@@ -252,114 +249,34 @@ benchmark_basics =
 - 異なる実装アプローチでの性能を比較する
 - ボトルネックを特定する
 
-## いつベンチマークを測定する？
+## 測定時の注意事項
 
-- パフォーマンスの問題が発生したとき
+同じ条件で測定すれば、常に同じ結果が得られるように
+
+- 測定環境の統一：CPU、メモリ、ネットワーク環境などの条件を揃える
+- 統計的な有意性：十分なサンプル数の確保、外れ値の除外
 """
         ]
 
 
-benchmark_considerations : List Content
-benchmark_considerations =
+elmBenchmark : List Content
+elmBenchmark =
     page
-        { chapter = "はじめに"
-        , title = "ベンチマーク測定時の注意点"
+        { chapter = "ベンチマーク測定の方法"
+        , title = "elm-explorations/benchmark"
         }
         [ markdownPage """
-## 測定環境の統一
+## 測定環境の最適化
 
-- CPU、メモリ、ネットワーク環境などの条件を揃える
-- バックグラウンドプロセスの影響を最小化
+- 測定前にJITコンパイルを強制し、最適化あり/なしのコードの混在を防ぐ
 
-## 統計的な有意性
+## 統計的に有意な結果を提供
 
-- 十分なサンプル数の確保、外れ値の除外
-
-## 測定の再現性
-
-- 同じ条件での再測定すれば、同じ結果が得られるように
+- 十分なサンプル数を得るまで反復実行
+- 複数対象を交互に実行し、測定の偏りを軽減
+- 外れ値を除外する
 """
         ]
-
-
-elmBenchmark_overview : List Content
-elmBenchmark_overview =
-    page
-        { chapter = "elm-explorations/benchmark"
-        , title = "Elmコードのベンチマークを実行するためのパッケージ"
-        }
-        [ markdownPage """
-## 測定環境の統一
-
-- 測定前にJITコンパイルを強制する（Warming JIT）
-    - 最適化されたものを使うように
-
-## 統計的な有意性
-
-- 有意な結果を得るまで反復実行（Collecting Samples）
-    - 複数対象を交互に実行し、測定の偏りを軽減する
-- 測定結果の信頼性を評価する指標（Goodness of Fit）
-    - （99%: 優秀 / 95%: 良好 / 90%: 要注意 / 80%以下: 信頼性低）
-"""
-        ]
-
-
-elmBenchmark_example : List Content
-elmBenchmark_example =
-    page
-        { chapter = "elm-explorations/benchmark"
-        , title = "使用例"
-        }
-        [ highlightElm identity """import Benchmark exposing (..)
-
-suite : Benchmark
-suite =
-    describe "FizzBuzz"
-        [ benchmark "fizzBuzz" <|
-            \\_ -> fizzBuzz 100
-        ]
-
-fizzBuzz : Int -> String
-fizzBuzz n =
-    case ( modBy 3 n, modBy 5 n ) of
-        ( 0, 0 ) -> "FizzBuzz"
-
-        ( 0, _ ) -> "Fizz"
-
-        ( _, 0 ) -> "Buzz"
-
-        _ -> String.fromInt n"""
-        ]
-
-
-elmBenchmark_benchmark : List Content
-elmBenchmark_benchmark =
-    page
-        { chapter = "elm-explorations/benchmark"
-        , title = "ベンチマーク測定の様子"
-        }
-        [ Custom.benchmark <|
-            Benchmark.describe "fizzBuzz"
-                [ Benchmark.benchmark "from the beginning" <|
-                    \_ -> fizzBuzz 100
-                ]
-        ]
-
-
-fizzBuzz : Int -> String
-fizzBuzz n =
-    case ( modBy 3 n, modBy 5 n ) of
-        ( 0, 0 ) ->
-            "FizzBuzz"
-
-        ( 0, _ ) ->
-            "Fizz"
-
-        ( _, 0 ) ->
-            "Buzz"
-
-        _ ->
-            String.fromInt n
 
 
 sampleData : List Content
