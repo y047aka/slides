@@ -12,7 +12,7 @@ import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
-import Formatting.Styled as Formatting exposing (background, colored, highlightElm, markdown, markdownPage, page, spacer)
+import Formatting.Styled as Formatting exposing (Tag(..), background, colored, highlightElm, markdown, markdownPage, page, spacer, tagCloud)
 import Html.Styled as Html exposing (br, div, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
@@ -41,7 +41,7 @@ slides =
           -- はじめに
           , introduction
           , motivation
-          , elmIntro
+          , elmTagCloud
           , benchmark_basics
           , benchmark_considerations
           ]
@@ -177,7 +177,7 @@ introduction =
         , title = "発表の流れ"
         }
         [ markdownPage """
-- Elmの簡単な紹介
+- Elmってどんな言語？
 - ベンチマーク測定方法の説明
 - 最適化の試み
     - List を Array に置き換える
@@ -188,21 +188,37 @@ introduction =
         ]
 
 
-elmIntro : List Content
-elmIntro =
+elmTagCloud : List Content
+elmTagCloud =
     page
         { chapter = "はじめに"
-        , title = "Elm の紹介"
+        , title = "Elmってどんな言語？"
         }
-        [ markdownPage """
-Elm はフロントエンド開発向けの純粋関数型言語です
+        [ tagCloud
+            [ -- 関数型言語共通の項目
+              Green 2.5 "静的型付け"
+            , Green 1.8 "型安全"
+            , Gray 2.2 "純粋関数型"
+            , Gray 1.8 "イミュータブル"
+            , Green 1.8 "Maybe型"
+            , Green 1.8 "Result型"
+            , Green 1.8 "代数的データ型"
+            , Green 2.0 "パターンマッチング"
+            , Green 1.8 "パイプ演算子"
+            , Gray 1.8 "型推論"
 
-- JavaScriptにコンパイルされる
-- 型安全性が高く、Webアプリを安全に構築できる
-- The Elm Architecture（TEA）による宣言的なUI設計
-- HaskellやOCamlなどの影響を受けつつ、シンプルな文法で学びやすい
-- 親切なエラーメッセージで開発体験が良い
-"""
+            -- Elm固有の項目
+            , Gray 2.5 "フロントエンド開発に特化"
+            , Gray 2.6 "JavaScriptにコンパイルされる"
+            , Green 3.2 "The Elm Architecture"
+            , Green 3.0 "実行時エラーが起きにくい"
+            , Green 2.4 "言語仕様がシンプルで学びやすい"
+            , Gray 2.2 "型クラスがない"
+            , Green 2.2 "タイムトラベルデバッガ"
+            , Gray 2.2 "JavaScriptとの連携はPortを介して行う"
+            , Green 2.2 "エラーメッセージが親切"
+            , Red 2.2 "ボイラープレートの記述が多い"
+            ]
         ]
 
 

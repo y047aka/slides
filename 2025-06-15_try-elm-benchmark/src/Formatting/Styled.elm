@@ -1,8 +1,8 @@
-module Formatting.Styled exposing (background, col, color, colored, highlightCode, highlightElm, image, markdown, markdownPage, noPointerEvents, padded, page, position, row, spacer, title)
+module Formatting.Styled exposing (Tag(..), background, col, color, colored, highlightCode, highlightElm, image, markdown, markdownPage, noPointerEvents, padded, page, position, row, spacer, tagCloud, title)
 
 import Css exposing (..)
 import Css.Global exposing (children, everything)
-import Html.Styled as Html exposing (Html, a, code, div, h1, header, img, text)
+import Html.Styled as Html exposing (Html, a, code, div, h1, header, img, span, text)
 import Html.Styled.Attributes as Attributes exposing (css, href, rel, src)
 import Markdown.Block as Block
 import Markdown.Html
@@ -411,3 +411,94 @@ highlightCode code =
 
                 Err _ ->
                     Html.pre [] [ Html.code [] [ text code ] ]
+
+
+
+-- Tag Cloud
+
+
+type Tag
+    = Green Float String
+    | Red Float String
+    | Gray Float String
+
+
+tagCloud : List Tag -> Content model msg
+tagCloud items =
+    item <|
+        Html.toUnstyled <|
+            div
+                [ css
+                    [ height (pct 100)
+                    , padding (px 20)
+                    , property "display" "grid"
+                    , property "place-items" "center"
+                    ]
+                ]
+                [ div
+                    [ css
+                        [ textAlign center
+                        , lineHeight (num 1.2)
+                        , property "display" "flex"
+                        , property "flex-wrap" "wrap"
+                        , property "justify-content" "center"
+                        , property "align-items" "center"
+                        , property "gap" "20px 30px"
+                        , maxWidth (px 1000)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    (List.map tagItem items)
+                ]
+
+
+tagToCssColor : Tag -> Color
+tagToCssColor tag =
+    case tag of
+        Green _ _ ->
+            hsl 142 0.71 0.4
+
+        Red _ _ ->
+            hsl 0 0.6 0.5
+
+        Gray _ _ ->
+            hsl 220 0.09 0.5
+
+
+tagItem : Tag -> Html msg
+tagItem tag =
+    let
+        ( size, label ) =
+            case tag of
+                Green s l ->
+                    ( s, l )
+
+                Red s l ->
+                    ( s, l )
+
+                Gray s l ->
+                    ( s, l )
+    in
+    span
+        [ css
+            [ fontSize (rem size)
+            , Css.color (tagToCssColor tag)
+            , if size >= 2.5 then
+                fontWeight bold
+
+              else if size >= 1.5 then
+                fontWeight (int 600)
+
+              else
+                fontWeight (int 500)
+            , display inlineBlock
+            , padding2 (px 2) (px 6)
+            , margin (px 2)
+            , property "user-select" "none"
+            , hover
+                [ transform (scale 1.1)
+                , Css.property "transition" "transform 0.2s ease"
+                ]
+            ]
+        ]
+        [ text label ]
