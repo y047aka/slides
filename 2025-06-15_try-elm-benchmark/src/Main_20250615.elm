@@ -18,6 +18,7 @@ import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
 import MyBenchmark as Benchmark
 import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
+import SliceShow.Content exposing (item)
 import SliceShow.Slide exposing (setDimensions, slide)
 import SyntaxHighlight exposing (Highlight(..), highlightLines)
 
@@ -40,8 +41,10 @@ slides =
 
           -- はじめに
           , introduction
-          , motivation
           , elmTagCloud
+          , elmMotorsportAnalysis
+          , elmMotorsportAnalysis_image
+          , motivation
           ]
         , chapter "ベンチマーク測定の方法"
             "P1001668.jpeg"
@@ -219,14 +222,59 @@ elmTagCloud =
         ]
 
 
+elmMotorsportAnalysis : List Content
+elmMotorsportAnalysis =
+    page
+        { chapter = "はじめに"
+        , title = "今回の題材"
+        }
+        [ markdownPage """
+## elm-motorsport-analysis
+
+自分用に開発しているモータースポーツのレビュー用アプリケーションです
+
+- レースの周回データを分析・可視化
+- 各車両の順位変動やラップタイムを比較
+- 大量の周回データを扱うため、パフォーマンスが気になった
+    - とくに困っているわけではないです
+"""
+        ]
+
+
+elmMotorsportAnalysis_image : List Content
+elmMotorsportAnalysis_image =
+    page
+        { chapter = "はじめに"
+        , title = "elm-motorsport-analysis"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ Css.height (pct 100)
+                        , borderRadius (px 10)
+                        , Css.property "background-image"
+                            ("url('"
+                                ++ "assets/images/2025-06-15_try-elm-benchmark/"
+                                ++ "elm_motorsport_analysis.png"
+                                ++ "')"
+                            )
+                        , backgroundSize Css.cover
+                        , backgroundRepeat noRepeat
+                        ]
+                    ]
+                    []
+        ]
+
+
 motivation : List Content
 motivation =
     page
         { chapter = "はじめに"
-        , title = "今回の動機"
+        , title = "ベンチマーク測定の動機"
         }
         [ markdownPage """
-好奇心：ベンチマークテストを体験してみたい
+## ベンチマークテストを体験してみたい
 
 - `List` と `Array` のパフォーマンスの違いを体感する
 - 非効率なコードが残っているうちに試したい
