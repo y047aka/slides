@@ -1,15 +1,57 @@
-module Formatting.Styled exposing (Tag(..), background, col, color, colored, highlightCode, highlightElm, image, markdown, markdownPage, noPointerEvents, padded, page, position, row, spacer, tagCloud, title)
+module Formatting.Styled exposing (Tag(..), background, col, color, colored, highlightCode, highlightElm, image, markdown, markdownPage, nextButton, noPointerEvents, padded, page, position, prevButton, row, spacer, tagCloud, title)
 
 import Css exposing (..)
 import Css.Global exposing (children, everything)
-import Html.Styled as Html exposing (Html, a, code, div, h1, header, img, span, text)
+import Html
+import Html.Attributes exposing (style)
+import Html.Styled exposing (Html, a, code, div, h1, header, img, span, text)
 import Html.Styled.Attributes as Attributes exposing (css, href, rel, src)
 import Markdown.Block as Block
 import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer exposing (Renderer)
-import SliceShow.Content exposing (Content, container, item)
+import SliceShow exposing (Content, container, item)
 import SyntaxHighlight exposing (HCode, elm, noLang, toBlockHtml)
+
+
+prevButton : ( Int, Int ) -> Content model msg
+prevButton ( wid, height ) =
+    SliceShow.prev
+        [ style "width" (String.fromInt wid ++ "px")
+        , style "height" (String.fromInt height ++ "px")
+        , style "background" "none"
+        , style "border" "none"
+        , style "padding" "0"
+        , style "margin" "0"
+        , style "cursor" "pointer"
+        ]
+        []
+
+
+nextButton : ( Int, Int ) -> Content model msg
+nextButton ( wid, height ) =
+    SliceShow.next
+        [ style "width" (String.fromInt wid ++ "px")
+        , style "height" (String.fromInt height ++ "px")
+        , style "background" "none"
+        , style "border" "none"
+        , style "padding" "0"
+        , style "margin" "0"
+        , style "cursor" "pointer"
+        ]
+        []
+
+
+position : Int -> Int -> Content model msg -> Content model msg
+position left top content =
+    container
+        (Html.div
+            [ style "position" "absolute"
+            , style "left" (String.fromInt left ++ "px")
+            , style "top" (String.fromInt top ++ "px")
+            ]
+        )
+        [ content ]
 
 
 slidePadding : Css.Style
@@ -25,7 +67,7 @@ padded =
 page : PageHeader -> List (Content model msg) -> List (Content model msg)
 page props contents =
     [ container
-        (List.map Html.fromUnstyled
+        (List.map Html.Styled.fromUnstyled
             >> div
                 [ css
                     [ height (pct 100)
@@ -37,16 +79,16 @@ page props contents =
                     , Css.color (hsl 0 0 0.2)
                     ]
                 ]
-            >> Html.toUnstyled
+            >> Html.Styled.toUnstyled
         )
         (pageHeader props :: contents)
     ]
 
 
-background : String -> List (Html msg) -> Content model msg
+background : String -> List (Html Never) -> Content model msg
 background url children =
     item <|
-        Html.toUnstyled <|
+        Html.Styled.toUnstyled <|
             div
                 [ css
                     [ Css.height (pct 100)
@@ -72,7 +114,7 @@ spacer h =
 image : Int -> Int -> String -> Content model msg
 image w h url =
     item <|
-        Html.toUnstyled <|
+        Html.Styled.toUnstyled <|
             img
                 [ src url
                 , Attributes.width w
@@ -82,10 +124,10 @@ image w h url =
                 []
 
 
-colored : String -> String -> List (Html msg) -> Content model msg
+colored : String -> String -> List (Html Never) -> Content model msg
 colored color1 color2 children =
     item <|
-        Html.toUnstyled <|
+        Html.Styled.toUnstyled <|
             div
                 [ css
                     [ Css.height (pct 100)
@@ -112,7 +154,7 @@ type alias PageHeader =
 pageHeader : PageHeader -> Content model msg
 pageHeader props =
     item <|
-        Html.toUnstyled <|
+        Html.Styled.toUnstyled <|
             header
                 [ css
                     [ displayFlex
@@ -129,18 +171,6 @@ pageHeader props =
                 , h1 [ css [ fontSize (em 0.8), fontWeight normal ] ]
                     [ text props.title ]
                 ]
-
-
-position : Int -> Int -> Html msg -> Html msg
-position left top content =
-    div
-        [ css
-            [ Css.position absolute
-            , Css.left (px (toFloat left))
-            , Css.top (px (toFloat top))
-            ]
-        ]
-        [ content ]
 
 
 color : String -> Html msg -> Html msg
@@ -189,7 +219,7 @@ markdownPage : String -> Content model msg
 markdownPage markdownStr =
     markdown markdownStr
         |> div [ css [ padding2 zero (em 2) ] ]
-        |> Html.toUnstyled
+        |> Html.Styled.toUnstyled
         |> item
 
 
@@ -199,10 +229,10 @@ customizedHtmlRenderer =
         \{ level, children } ->
             case level of
                 Block.H1 ->
-                    Html.h1 [ css [ margin zero, fontSize (em 1.4) ] ] children
+                    Html.Styled.h1 [ css [ margin zero, fontSize (em 1.4) ] ] children
 
                 Block.H2 ->
-                    Html.h2
+                    Html.Styled.h2
                         [ css
                             [ fontSize (em 1)
                             , nthOfType "n+2" [ margin3 (em 1.8) zero zero ]
@@ -211,27 +241,27 @@ customizedHtmlRenderer =
                         children
 
                 Block.H3 ->
-                    Html.h3 [] children
+                    Html.Styled.h3 [] children
 
                 Block.H4 ->
-                    Html.h4 [] children
+                    Html.Styled.h4 [] children
 
                 Block.H5 ->
-                    Html.h5 [] children
+                    Html.Styled.h5 [] children
 
                 Block.H6 ->
-                    Html.h6 [] children
-    , paragraph = Html.p []
-    , hardLineBreak = Html.br [] []
-    , blockQuote = Html.blockquote []
+                    Html.Styled.h6 [] children
+    , paragraph = Html.Styled.p []
+    , hardLineBreak = Html.Styled.br [] []
+    , blockQuote = Html.Styled.blockquote []
     , strong =
-        \children -> Html.strong [] children
+        \children -> Html.Styled.strong [] children
     , emphasis =
-        \children -> Html.em [] children
+        \children -> Html.Styled.em [] children
     , strikethrough =
-        \children -> Html.del [] children
+        \children -> Html.Styled.del [] children
     , codeSpan =
-        \content -> Html.code [] [ Html.text content ]
+        \content -> Html.Styled.code [] [ Html.Styled.text content ]
     , link =
         \link children ->
             let
@@ -263,7 +293,7 @@ customizedHtmlRenderer =
         \imageInfo ->
             case imageInfo.title of
                 Just title_ ->
-                    Html.img
+                    Html.Styled.img
                         [ Attributes.src imageInfo.src
                         , Attributes.alt imageInfo.alt
                         , Attributes.title title_
@@ -271,16 +301,16 @@ customizedHtmlRenderer =
                         []
 
                 Nothing ->
-                    Html.img
+                    Html.Styled.img
                         [ Attributes.src imageInfo.src
                         , Attributes.alt imageInfo.alt
                         ]
                         []
     , text =
-        Html.text
+        Html.Styled.text
     , unorderedList =
         \items ->
-            Html.ul [ css [ margin2 (em 0.6) zero ] ]
+            Html.Styled.ul [ css [ margin2 (em 0.6) zero ] ]
                 (items
                     |> List.map
                         (\item ->
@@ -291,10 +321,10 @@ customizedHtmlRenderer =
                                         checkbox =
                                             case task of
                                                 Block.NoTask ->
-                                                    Html.text ""
+                                                    Html.Styled.text ""
 
                                                 Block.IncompleteTask ->
-                                                    Html.input
+                                                    Html.Styled.input
                                                         [ Attributes.disabled True
                                                         , Attributes.checked False
                                                         , Attributes.type_ "checkbox"
@@ -302,19 +332,19 @@ customizedHtmlRenderer =
                                                         []
 
                                                 Block.CompletedTask ->
-                                                    Html.input
+                                                    Html.Styled.input
                                                         [ Attributes.disabled True
                                                         , Attributes.checked True
                                                         , Attributes.type_ "checkbox"
                                                         ]
                                                         []
                                     in
-                                    Html.li [ css [ margin2 (em 0.4) zero ] ] (checkbox :: children)
+                                    Html.Styled.li [ css [ margin2 (em 0.4) zero ] ] (checkbox :: children)
                         )
                 )
     , orderedList =
         \startingIndex items ->
-            Html.ol
+            Html.Styled.ol
                 (case startingIndex of
                     1 ->
                         [ Attributes.start startingIndex ]
@@ -325,17 +355,17 @@ customizedHtmlRenderer =
                 (items
                     |> List.map
                         (\itemBlocks ->
-                            Html.li []
+                            Html.Styled.li []
                                 itemBlocks
                         )
                 )
     , html =
         Markdown.Html.oneOf
-            [ Markdown.Html.tag "br" (\children -> Html.br [] children) ]
+            [ Markdown.Html.tag "br" (\children -> Html.Styled.br [] children) ]
     , codeBlock =
         \{ body, language } ->
             let
-                classes : List (Html.Attribute msg)
+                classes : List (Html.Styled.Attribute msg)
                 classes =
                     -- Only the first word is used in the class
                     case Maybe.map String.words language of
@@ -345,26 +375,26 @@ customizedHtmlRenderer =
                         _ ->
                             []
             in
-            Html.pre [ css [ width (pct 100), overflow hidden, fontSize (em 0.6) ] ]
-                [ Html.code classes
-                    [ Html.text body
+            Html.Styled.pre [ css [ width (pct 100), overflow hidden, fontSize (em 0.6) ] ]
+                [ Html.Styled.code classes
+                    [ Html.Styled.text body
                     ]
                 ]
-    , thematicBreak = Html.hr [] []
+    , thematicBreak = Html.Styled.hr [] []
     , table =
-        Html.table
+        Html.Styled.table
             [ css
                 [ width (pct 100)
                 , borderCollapse collapse
                 , fontSize (rem 2.4)
                 ]
             ]
-    , tableHeader = Html.thead []
-    , tableBody = Html.tbody []
-    , tableRow = Html.tr []
+    , tableHeader = Html.Styled.thead []
+    , tableBody = Html.Styled.tbody []
+    , tableRow = Html.Styled.tr []
     , tableHeaderCell =
         \maybeAlignment ->
-            Html.th
+            Html.Styled.th
                 [ css
                     [ padding (px 15)
                     , textAlign center
@@ -374,7 +404,7 @@ customizedHtmlRenderer =
                 ]
     , tableCell =
         \maybeAlignment ->
-            Html.td
+            Html.Styled.td
                 [ css
                     [ padding (px 15)
                     , textAlign center
@@ -389,14 +419,14 @@ customizedHtmlRenderer =
 highlightElm : (HCode -> HCode) -> String -> Content model msg
 highlightElm f code =
     item <|
-        Html.toUnstyled <|
+        Html.Styled.toUnstyled <|
             case elm code of
                 Ok highlighted ->
                     div [ css [ overflow hidden, borderRadius (px 10) ] ]
-                        [ Html.fromUnstyled (toBlockHtml (Just 1) (f highlighted)) ]
+                        [ Html.Styled.fromUnstyled (toBlockHtml (Just 1) (f highlighted)) ]
 
                 Err _ ->
-                    Html.pre [] [ Html.code [] [ text code ] ]
+                    Html.Styled.pre [] [ Html.Styled.code [] [ text code ] ]
 
 
 {-| 汎用コードのシンタックスハイライト表示用ヘルパー関数
@@ -404,13 +434,13 @@ highlightElm f code =
 highlightCode : String -> Content model msg
 highlightCode code =
     item <|
-        Html.toUnstyled <|
+        Html.Styled.toUnstyled <|
             case noLang code of
                 Ok highlighted ->
-                    Html.fromUnstyled (toBlockHtml (Just 1) highlighted)
+                    Html.Styled.fromUnstyled (toBlockHtml (Just 1) highlighted)
 
                 Err _ ->
-                    Html.pre [] [ Html.code [] [ text code ] ]
+                    Html.Styled.pre [] [ Html.Styled.code [] [ text code ] ]
 
 
 
@@ -426,7 +456,7 @@ type Tag
 tagCloud : List Tag -> Content model msg
 tagCloud items =
     item <|
-        Html.toUnstyled <|
+        Html.Styled.toUnstyled <|
             div
                 [ css
                     [ height (pct 100)

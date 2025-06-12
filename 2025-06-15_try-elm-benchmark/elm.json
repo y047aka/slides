@@ -23,7 +23,7 @@
             "pzp1997/assoc-list": "1.0.0",
             "rtfeldman/elm-css": "18.0.0",
             "skyqrose/assoc-list-extra": "1.0.0",
-            "w0rm/elm-slice-show": "5.0.2"
+            "w0rm/elm-slice-show": "6.0.0"
         },
         "indirect": {
             "elm/parser": "1.1.0",

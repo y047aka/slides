@@ -12,22 +12,19 @@ import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
-import Formatting.Styled as Formatting exposing (Tag(..), background, colored, highlightElm, markdown, markdownPage, page, spacer, tagCloud)
+import Formatting.Styled as Formatting exposing (Tag(..), background, colored, highlightElm, markdown, markdownPage, nextButton, page, prevButton, spacer, tagCloud)
 import Html.Styled as Html exposing (br, div, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
 import MyBenchmark as Benchmark
-import SliceShow exposing (Message, Model, init, setSubscriptions, setUpdate, setView, show)
-import SliceShow.Content exposing (item)
-import SliceShow.Slide exposing (setDimensions, slide)
+import SliceShow exposing (Message, Model, init, item, setDimensions, setSubscriptions, setUpdate, setView, show)
 import SyntaxHighlight exposing (Highlight(..), highlightLines)
 
 
 main : Program () (Model Custom.Model Msg) (Message Msg)
 main =
-    slides
-        |> List.map (slide >> setDimensions ( 1280, 720 ))
-        |> init
+    init slides
+        |> setDimensions ( 1280, 720 )
         |> setSubscriptions Custom.subscriptions
         |> setView Custom.view
         |> setUpdate Custom.update
@@ -36,66 +33,75 @@ main =
 
 slides : List (List Content)
 slides =
-    List.concat
-        [ [ cover
+    [ [ cover
 
-          -- はじめに
-          , introduction
-          , elmTagCloud
-          , elmMotorsportAnalysis
-          , elmMotorsportAnalysis_image
-          , motivation
-          ]
-        , chapter "ベンチマーク測定の方法"
-            "P1001668.jpeg"
-            [ benchmark_overview
-            , elmBenchmark
-            ]
-        , chapter "ベンチマーク測定してみよう！"
-            "le_mans_24h_csv.png"
-            [ oldWorkflow
-            , oldWorkflow_code
-            , oldWorkflow_benchmark
-            , optimization_ideas
-            ]
-        , chapter "改善① List を Array に置き換える"
-            "P1002085.jpeg"
-            [ replaceWithArray_overview
-            , replaceWithArray_study
-            , replaceWithArray_code
-            , replaceWithArray_benchmark
-            , replaceWithArray_sortBy
-            , replaceWithArray_sortBy_benchmark
-            ]
-        , chapter "改善② AssocList を Dict に置き換える"
-            "P1002442.jpeg"
-            [ replaceWithDict_overview
-            , replaceWithDict_code
-            , replaceWithDict_ordersByLap_benchmark
-            , replaceWithDict_preprocessHelper_benchmark
-            ]
-        , chapter "改善③ 計算ロジックを改良する"
-            "P1002755.jpeg"
-            [ improve_logic_overview
-            , improve_logic_code_old
-            , improve_logic_code
-            , improve_logic_laps_benchmark
-            , improve_logic_preprocessHelper_benchmark
-            , improve_logic_benchmark
-            ]
-        , chapter "改善④ 入力データ形式の変更"
-            "P1003304.jpeg"
-            [ replaceWithJson_overview
-            , replaceWithJson_benchmark
-            ]
-        , chapter "改善⑤ その他の選択肢"
-            "P1002574.jpeg"
-            [ cli ]
-        , chapter "ベンチマークから得られた知見"
-            ""
-            [ lessonsLearned ]
-        , [ conclusion ]
+      -- はじめに
+      , introduction
+      , elmTagCloud
+      , elmMotorsportAnalysis
+      , elmMotorsportAnalysis_image
+      , motivation
+      ]
+    , chapter "ベンチマーク測定の方法"
+        "P1001668.jpeg"
+        [ benchmark_overview
+        , elmBenchmark
         ]
+    , chapter "ベンチマーク測定してみよう！"
+        "le_mans_24h_csv.png"
+        [ oldWorkflow
+        , oldWorkflow_code
+        , oldWorkflow_benchmark
+        , optimization_ideas
+        ]
+    , chapter "改善① List を Array に置き換える"
+        "P1002085.jpeg"
+        [ replaceWithArray_overview
+        , replaceWithArray_study
+        , replaceWithArray_code
+        , replaceWithArray_benchmark
+        , replaceWithArray_sortBy
+        , replaceWithArray_sortBy_benchmark
+        ]
+    , chapter "改善② AssocList を Dict に置き換える"
+        "P1002442.jpeg"
+        [ replaceWithDict_overview
+        , replaceWithDict_code
+        , replaceWithDict_ordersByLap_benchmark
+        , replaceWithDict_preprocessHelper_benchmark
+        ]
+    , chapter "改善③ 計算ロジックを改良する"
+        "P1002755.jpeg"
+        [ improve_logic_overview
+        , improve_logic_code_old
+        , improve_logic_code
+        , improve_logic_laps_benchmark
+        , improve_logic_preprocessHelper_benchmark
+        , improve_logic_benchmark
+        ]
+    , chapter "改善④ 入力データ形式の変更"
+        "P1003304.jpeg"
+        [ replaceWithJson_overview
+        , replaceWithJson_benchmark
+        ]
+    , chapter "改善⑤ その他の選択肢"
+        "P1002574.jpeg"
+        [ cli ]
+    , chapter "ベンチマークから得られた知見"
+        ""
+        [ lessonsLearned ]
+    , [ conclusion ]
+    ]
+        |> List.concat
+        |> List.map addMobileNavigationButtons
+
+
+addMobileNavigationButtons : List Content -> List Content
+addMobileNavigationButtons contents =
+    contents
+        ++ [ prevButton ( 100, 720 ) |> Formatting.position 0 0
+           , nextButton ( 100, 720 ) |> Formatting.position (1280 - 100) 0
+           ]
 
 
 cover : List Content

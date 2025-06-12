@@ -3,7 +3,7 @@ module Custom exposing (Content, Model, Msg, benchmark, subscriptions, update, v
 import Custom.Benchmark as Benchmark
 import Html exposing (Html)
 import MyBenchmark exposing (Benchmark)
-import SliceShow.Content as Content
+import SliceShow as Content
 
 
 type alias Content =
