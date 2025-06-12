@@ -2,6 +2,9 @@ module Main_20250615 exposing (main)
 
 import Array exposing (Array)
 import Array.Extra2
+import Chart as C
+import Chart.Attributes as CA
+import Chart.Item as CI
 import Css exposing (..)
 import Csv.Decode as CD exposing (FieldNames(..))
 import Custom exposing (Content, Msg)
@@ -18,6 +21,7 @@ import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
 import MyBenchmark as Benchmark
 import SliceShow exposing (Message, Model, init, item, setDimensions, setSubscriptions, setUpdate, setView, show)
+import Svg
 import SyntaxHighlight exposing (Highlight(..), highlightLines)
 
 
@@ -52,23 +56,29 @@ slides =
         [ oldWorkflow
         , oldWorkflow_code
         , oldWorkflow_benchmark
+        , oldWorkflow_benchmark_chart
         , optimization_ideas
         ]
     , chapter "改善① List を Array に置き換える"
         "P1002085.jpeg"
         [ replaceWithArray_overview
         , replaceWithArray_study
+        , replaceWithArray_study_chart
         , replaceWithArray_code
         , replaceWithArray_benchmark
+        , replaceWithArray_benchmark_chart
         , replaceWithArray_sortBy
         , replaceWithArray_sortBy_benchmark
+        , replaceWithArray_sortBy_benchmark_chart
         ]
     , chapter "改善② AssocList を Dict に置き換える"
         "P1002442.jpeg"
         [ replaceWithDict_overview
         , replaceWithDict_code
         , replaceWithDict_ordersByLap_benchmark
+        , replaceWithDict_ordersByLap_benchmark_chart
         , replaceWithDict_preprocessHelper_benchmark
+        , replaceWithDict_preprocessHelper_benchmark_chart
         ]
     , chapter "改善③ 計算ロジックを改良する"
         "P1002755.jpeg"
@@ -76,13 +86,17 @@ slides =
         , improve_logic_code_old
         , improve_logic_code
         , improve_logic_laps_benchmark
+        , improve_logic_laps_benchmark_chart
         , improve_logic_preprocessHelper_benchmark
+        , improve_logic_preprocessHelper_benchmark_chart
         , improve_logic_benchmark
+        , improve_logic_benchmark_chart
         ]
     , chapter "改善④ 入力データ形式の変更"
         "P1003304.jpeg"
         [ replaceWithJson_overview
         , replaceWithJson_benchmark
+        , replaceWithJson_benchmark_chart
         ]
     , chapter "改善⑤ その他の選択肢"
         "P1002574.jpeg"
@@ -379,7 +393,7 @@ oldWorkflow_benchmark : List Content
 oldWorkflow_benchmark =
     page
         { chapter = "ベンチマーク測定してみよう！"
-        , title = "ベンチマーク"
+        , title = "ベンチマーク：preprocess"
         }
         [ Custom.benchmark <|
             Benchmark.describe "Data.Wec.Preprocess"
@@ -408,6 +422,102 @@ oldWorkflow_benchmark =
                     )
                 ]
         ]
+
+
+oldWorkflow_benchmark_chart : List Content
+oldWorkflow_benchmark_chart =
+    page
+        { chapter = "ベンチマーク測定してみよう！"
+        , title = "測定結果：preprocess"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.yLabels
+                                [ CA.withGrid
+                                , CA.fontSize 24
+                                , CA.format (\y -> formatWithCommas (exponential y))
+                                ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
+                            , C.series .x
+                                [ C.interpolated (.y >> logarithmic) [ CA.monotone ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 67307 }
+                                , { x = 100, y = 1272 }
+                                , { x = 1000, y = 62 }
+                                , { x = 5000, y = 11 }
+                                ]
+                            , C.dotLabels
+                                [ CA.moveUp 20
+                                , CA.fontSize 20
+                                , CA.format (\item -> CI.getData item |> .y |> formatWithCommas)
+                                ]
+                            ]
+                    ]
+        ]
+
+
+{-| 対数変換用の補助関数
+-}
+logarithmic : Float -> Float
+logarithmic number =
+    logBase 10 number
+
+
+exponential : Float -> Float
+exponential n =
+    toFloat (Basics.round (10 ^ n))
+
+
+{-| 数値を桁区切りを含めた文字列に変換する関数
+高階関数を活用した関数型プログラミングらしい実装
+-}
+formatWithCommas : Float -> String
+formatWithCommas number =
+    let
+        ( integerPart, decimalPart ) =
+            case String.split "." (String.fromFloat number) of
+                integerPart_ :: decimalPart_ :: tails ->
+                    ( integerPart_, Just (String.join "." (decimalPart_ :: tails)) )
+
+                [ integerPart_ ] ->
+                    ( integerPart_, Nothing )
+
+                [] ->
+                    ( "", Nothing )
+
+        formatInteger : String -> String
+        formatInteger str =
+            str
+                |> String.reverse
+                |> chunksOfString 3
+                |> List.map String.reverse
+                |> List.reverse
+                |> String.join ","
+
+        chunksOfString : Int -> String -> List String
+        chunksOfString size string =
+            if String.isEmpty string then
+                []
+
+            else
+                String.left size string :: chunksOfString size (String.dropLeft size string)
+    in
+    formatInteger integerPart
+        ++ (Maybe.withDefault "" <| Maybe.map (\d -> "." ++ d) <| decimalPart)
 
 
 optimization_ideas : List Content
@@ -455,7 +565,7 @@ replaceWithArray_study : List Content
 replaceWithArray_study =
     page
         { chapter = "改善① List を Array に置き換える"
-        , title = "List.length と Array.length の比較"
+        , title = "ベンチマーク：List.length と Array.length"
         }
         [ Custom.benchmark <|
             Benchmark.describe "length" <|
@@ -480,6 +590,57 @@ replaceWithArray_study =
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Array.length target ))
                     )
                 ]
+        ]
+
+
+replaceWithArray_study_chart : List Content
+replaceWithArray_study_chart =
+    page
+        { chapter = "改善① List を Array に置き換える"
+        , title = "測定結果：List.length と Array.length"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
+                            , C.yLabels
+                                [ CA.withGrid
+                                , CA.fontSize 24
+                                , CA.format formatWithCommas
+                                ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.monotone, CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 5, y = 30822646 }
+                                , { x = 50, y = 3824299 }
+                                , { x = 500, y = 392379 }
+                                ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.monotone, CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 5, y = 274508871 }
+                                , { x = 50, y = 274508871 }
+                                , { x = 500, y = 274508871 }
+                                ]
+                            , C.dotLabels
+                                [ CA.moveUp 20
+                                , CA.fontSize 16
+                                , CA.format (\item -> CI.getY item |> formatWithCommas)
+                                ]
+                            ]
+                    ]
         ]
 
 
@@ -552,6 +713,54 @@ startPositions_tmp laps =
         |> List.map .carNumber
 
 
+replaceWithArray_benchmark_chart : List Content
+replaceWithArray_benchmark_chart =
+    page
+        { chapter = "改善① List を Array に置き換える"
+        , title = "測定結果：startPositions"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.yLabels
+                                [ CA.withGrid
+                                , CA.fontSize 24
+                                , CA.format (\y -> formatWithCommas (exponential y))
+                                ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
+                            , C.series .x
+                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 5, y = 10777648 }
+                                , { x = 50, y = 2137145 }
+                                , { x = 500, y = 206667 }
+                                , { x = 5000, y = 21238 }
+                                ]
+                            , C.series .x
+                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 5, y = 3936471 }
+                                , { x = 50, y = 1500727 }
+                                , { x = 500, y = 230693 }
+                                , { x = 5000, y = 22697 }
+                                ]
+                            ]
+                    ]
+        ]
+
+
 replaceWithArray_sortBy : List Content
 replaceWithArray_sortBy =
     page
@@ -577,10 +786,10 @@ replaceWithArray_sortBy_benchmark : List Content
 replaceWithArray_sortBy_benchmark =
     page
         { chapter = "改善① List を Array に置き換える"
-        , title = "ベンチマーク：startPositions"
+        , title = "ベンチマーク：sortBy"
         }
         [ Custom.benchmark <|
-            Benchmark.describe "startPositions"
+            Benchmark.describe "sortBy"
                 [ Benchmark.scale "Listに変換して List.sortBy"
                     ([ 5 -- 3,936,471 runs/s (GoF: 99.95%)
                      , 50 -- 1,500,727 runs/s (GoF: 99.97%)
@@ -608,6 +817,54 @@ startPositions_array laps =
     Array.filter (\{ lapNumber } -> lapNumber == 1) laps
         |> Array.Extra2.sortBy .elapsed
         |> Array.map .carNumber
+
+
+replaceWithArray_sortBy_benchmark_chart : List Content
+replaceWithArray_sortBy_benchmark_chart =
+    page
+        { chapter = "改善① List を Array に置き換える"
+        , title = "測定結果：sortBy"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.yLabels
+                                [ CA.withGrid
+                                , CA.fontSize 24
+                                , CA.format (\y -> formatWithCommas (exponential y))
+                                ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
+                            , C.series .x
+                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 5, y = 3936471 }
+                                , { x = 50, y = 1500727 }
+                                , { x = 500, y = 230693 }
+                                , { x = 5000, y = 22697 }
+                                ]
+                            , C.series .x
+                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 5, y = 3936471 }
+                                , { x = 50, y = 1500727 }
+                                , { x = 500, y = 230693 }
+                                , { x = 5000, y = 22697 }
+                                ]
+                            ]
+                    ]
+        ]
 
 
 replaceWithDict_overview : List Content
@@ -690,6 +947,57 @@ replaceWithDict_ordersByLap_benchmark =
         ]
 
 
+replaceWithDict_ordersByLap_benchmark_chart : List Content
+replaceWithDict_ordersByLap_benchmark_chart =
+    page
+        { chapter = "改善② AssocList を Dict に置き換える"
+        , title = "測定結果：ordersByLap"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
+                            , C.yLabels
+                                [ CA.withGrid
+                                , CA.format (\y -> formatWithCommas (exponential y))
+                                , CA.fontSize 24
+                                ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
+                            , C.series .x
+                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 5, y = 1290015 }
+                                , { x = 50, y = 71653 }
+                                , { x = 500, y = 625 }
+                                ]
+                            , C.series .x
+                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 5, y = 945315 }
+                                , { x = 50, y = 64006 }
+                                , { x = 500, y = 5279 }
+                                ]
+                            , C.dotLabels
+                                [ CA.moveUp 20
+                                , CA.fontSize 16
+                                , CA.format (\item -> CI.getData item |> .y |> formatWithCommas)
+                                ]
+                            ]
+                    ]
+        ]
+
+
 replaceWithDict_preprocessHelper_benchmark : List Content
 replaceWithDict_preprocessHelper_benchmark =
     page
@@ -719,6 +1027,56 @@ replaceWithDict_preprocessHelper_benchmark =
                 "improved"
                 -- 2,215 runs/s (GoF: 99.95%)
                 (\_ -> Data.Wec.Preprocess.Dict.preprocessHelper options_dict)
+        ]
+
+
+replaceWithDict_preprocessHelper_benchmark_chart : List Content
+replaceWithDict_preprocessHelper_benchmark_chart =
+    page
+        { chapter = "改善② AssocList を Dict に置き換える"
+        , title = "測定結果：preprocessHelper"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
+                            , C.yLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "実装" ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 80 ] ]
+                                [ { x = 1, y = 349 }
+                                ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 80 ] ]
+                                [ { x = 1, y = 2215 }
+                                ]
+                            , C.dotLabels
+                                [ CA.moveUp 20
+                                , CA.fontSize 18
+                                , CA.format
+                                    (\item ->
+                                        let
+                                            data =
+                                                CI.getData item
+                                        in
+                                        formatWithCommas data.y
+                                    )
+                                ]
+                            ]
+                    ]
         ]
 
 
@@ -816,6 +1174,56 @@ improve_logic_laps_benchmark =
         ]
 
 
+improve_logic_laps_benchmark_chart : List Content
+improve_logic_laps_benchmark_chart =
+    page
+        { chapter = "改善③ 計算ロジックを改良する"
+        , title = "測定結果：laps_"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
+                            , C.yLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "実装" ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 80 ] ]
+                                [ { x = 1, y = 294 }
+                                ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 80 ] ]
+                                [ { x = 1, y = 2199 }
+                                ]
+                            , C.dotLabels
+                                [ CA.moveUp 20
+                                , CA.fontSize 18
+                                , CA.format
+                                    (\item ->
+                                        let
+                                            data =
+                                                CI.getData item
+                                        in
+                                        formatWithCommas data.y
+                                    )
+                                ]
+                            ]
+                    ]
+        ]
+
+
 improve_logic_preprocessHelper_benchmark : List Content
 improve_logic_preprocessHelper_benchmark =
     page
@@ -838,6 +1246,56 @@ improve_logic_preprocessHelper_benchmark =
                 "improved"
                 -- 2,215 runs/s (GoF: 99.95%)
                 (\_ -> Data.Wec.Preprocess.preprocessHelper options)
+        ]
+
+
+improve_logic_preprocessHelper_benchmark_chart : List Content
+improve_logic_preprocessHelper_benchmark_chart =
+    page
+        { chapter = "改善③ 計算ロジックを改良する"
+        , title = "測定結果：preprocessHelper"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
+                            , C.yLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "実装" ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 80 ] ]
+                                [ { x = 1, y = 349 }
+                                ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 80 ] ]
+                                [ { x = 1, y = 2215 }
+                                ]
+                            , C.dotLabels
+                                [ CA.moveUp 20
+                                , CA.fontSize 18
+                                , CA.format
+                                    (\item ->
+                                        let
+                                            data =
+                                                CI.getData item
+                                        in
+                                        formatWithCommas data.y
+                                    )
+                                ]
+                            ]
+                    ]
         ]
 
 
@@ -870,6 +1328,56 @@ improve_logic_benchmark =
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Data.Wec.Preprocess.preprocess target ))
                     )
                 ]
+        ]
+
+
+improve_logic_benchmark_chart : List Content
+improve_logic_benchmark_chart =
+    page
+        { chapter = "改善③ 計算ロジックを改良する"
+        , title = "測定結果：laps_"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
+                            , C.yLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "実装" ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 80 ] ]
+                                [ { x = 1, y = 294 }
+                                ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 80 ] ]
+                                [ { x = 1, y = 2199 }
+                                ]
+                            , C.dotLabels
+                                [ CA.moveUp 20
+                                , CA.fontSize 18
+                                , CA.format
+                                    (\item ->
+                                        let
+                                            data =
+                                                CI.getData item
+                                        in
+                                        formatWithCommas data.y
+                                    )
+                                ]
+                            ]
+                    ]
         ]
 
 
@@ -929,6 +1437,56 @@ replaceWithJson_benchmark =
                         Err _ ->
                             []
                 )
+        ]
+
+
+replaceWithJson_benchmark_chart : List Content
+replaceWithJson_benchmark_chart =
+    page
+        { chapter = "改善④ 入力データ形式の変更"
+        , title = "測定結果：CSV vs JSON"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ width (px 800)
+                        , height (px 500)
+                        , margin2 zero auto
+                        ]
+                    ]
+                    [ Html.fromUnstyled <|
+                        C.chart
+                            [ CA.height 500
+                            , CA.width 800
+                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
+                            ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
+                            , C.yLabels [ CA.withGrid, CA.fontSize 24 ]
+                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データ形式" ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 100 ] ]
+                                [ { x = 1, y = 307 }
+                                ]
+                            , C.series .x
+                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 100 ] ]
+                                [ { x = 1, y = 799 }
+                                ]
+                            , C.dotLabels
+                                [ CA.moveUp 20
+                                , CA.fontSize 18
+                                , CA.format
+                                    (\item ->
+                                        let
+                                            data =
+                                                CI.getData item
+                                        in
+                                        formatWithCommas data.y
+                                    )
+                                ]
+                            ]
+                    ]
         ]
 
 
