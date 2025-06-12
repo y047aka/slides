@@ -51,7 +51,10 @@ view model =
             ]
             [ button
                 [ onClick (App.Update model)
-                , css [ marginLeft auto ]
+                , css
+                    [ zIndex (int 1000)
+                    , marginLeft auto
+                    ]
                 ]
                 [ text "Start" ]
             , div [ css [ overflow hidden, borderRadius (px 10) ] ]
