@@ -97,14 +97,14 @@ progress status =
 -}
 numBuckets : Int
 numBuckets =
-    25
+    3
 
 
 {-| How many samples will we take per bucket?
 -}
 samplesPerBucket : Int
 samplesPerBucket =
-    5
+    4
 
 
 {-| How far apart should the sample size for each bucket be?

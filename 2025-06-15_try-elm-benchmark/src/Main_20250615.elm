@@ -62,9 +62,6 @@ slides =
     , chapter "改善① List を Array に置き換える"
         "P1002085.jpeg"
         [ replaceWithArray_overview
-        , replaceWithArray_study
-        , replaceWithArray_study_chart
-        , replaceWithArray_code
         , replaceWithArray_benchmark
         , replaceWithArray_benchmark_chart
         , replaceWithArray_sortBy
@@ -398,11 +395,12 @@ oldWorkflow_benchmark =
         [ Custom.benchmark <|
             Benchmark.describe "Data.Wec.Preprocess"
                 [ Benchmark.scale "old"
-                    ([ 10 -- 67,307 runs/s (GoF: 99.99%)
-                     , 100 -- 1,272 runs/s (GoF: 99.99%)
+                    ([ 10 -- 89,854 runs/s (GoF: 99.79%)
+                     , 100 -- 1,719 runs/s (GoF: 99.97%)
 
-                     --  , 1000 -- 62 runs/s (GoF: 99.99%)
-                     --  , 5000 -- 11 runs/s (GoF: 100%)
+                     --  , 1000 -- 70 runs/s (GoF: 99.97%)
+                     --    2500 -- 29 runs/s (GoF: 99.99%)
+                     --    5000 -- 13 runs/s (GoF: 99.99%)
                      ]
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.preprocess target ))
@@ -422,6 +420,11 @@ oldWorkflow_benchmark =
                     )
                 ]
         ]
+
+
+toString : Int -> String
+toString n =
+    "n = " ++ String.fromInt n
 
 
 oldWorkflow_benchmark_chart : List Content
@@ -454,11 +457,12 @@ oldWorkflow_benchmark_chart =
                             , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
                             , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
                             , C.series .x
-                                [ C.interpolated (.y >> logarithmic) [ CA.monotone ] [ CA.circle, CA.size 40 ] ]
-                                [ { x = 10, y = 67307 }
-                                , { x = 100, y = 1272 }
-                                , { x = 1000, y = 62 }
-                                , { x = 5000, y = 11 }
+                                [ C.interpolated (.y >> logarithmic) [] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 89854 }
+                                , { x = 100, y = 1719 }
+                                , { x = 1000, y = 70 }
+                                , { x = 2500, y = 29 }
+                                , { x = 5000, y = 13 }
                                 ]
                             , C.dotLabels
                                 [ CA.moveUp 20
@@ -550,112 +554,7 @@ replaceWithArray_overview =
 - Listは線形検索、Arrayはインデックスアクセスに強い
 - 1万行以上のデータを扱うので、Arrayの優位性を体感できそう
 """
-        , highlightElm identity """{-| スタート時の各車両の順位を求める関数
-    暫定的に1周目の通過タイムの早かった順で代用している
--}
-startPositions : List Lap -> List String
-startPositions laps =
-    List.filter (\\{ lapNumber } -> lapNumber == 1) laps
-        |> List.sortBy .elapsed
-        |> List.map .carNumber"""
-        ]
-
-
-replaceWithArray_study : List Content
-replaceWithArray_study =
-    page
-        { chapter = "改善① List を Array に置き換える"
-        , title = "ベンチマーク：List.length と Array.length"
-        }
-        [ Custom.benchmark <|
-            Benchmark.describe "length" <|
-                [ Benchmark.scale "List.length"
-                    ([ 5 -- 30,822,646 runs/s (GoF: 99.9%)
-                     , 50 -- 3,824,299 runs/s (GoF: 99.9%)
-                     , 500 -- 392,379 runs/s (GoF: 99.92%)
-
-                     --  , 5000 -- 38,310 runs/s (GoF: 99.79%)
-                     ]
-                        |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
-                        |> List.map (\( size, target ) -> ( toString size, \_ -> List.length target ))
-                    )
-                , Benchmark.scale "Array.length"
-                    ([ 5 -- 274,508,871 runs/s (GoF: 99.61%)
-                     , 50
-                     , 500
-
-                     --  , 5000 -- 274,955,086 runs/s (GoF: 99.67%)
-                     ]
-                        |> List.map (\size -> ( size, Array.fromList (Fixture.csvDecodedOfSize size) ))
-                        |> List.map (\( size, target ) -> ( toString size, \_ -> Array.length target ))
-                    )
-                ]
-        ]
-
-
-replaceWithArray_study_chart : List Content
-replaceWithArray_study_chart =
-    page
-        { chapter = "改善① List を Array に置き換える"
-        , title = "測定結果：List.length と Array.length"
-        }
-        [ item <|
-            Html.toUnstyled <|
-                div
-                    [ css
-                        [ width (px 800)
-                        , height (px 500)
-                        , margin2 zero auto
-                        ]
-                    ]
-                    [ Html.fromUnstyled <|
-                        C.chart
-                            [ CA.height 500
-                            , CA.width 800
-                            , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
-                            ]
-                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
-                            , C.yLabels
-                                [ CA.withGrid
-                                , CA.fontSize 24
-                                , CA.format formatWithCommas
-                                ]
-                            , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
-                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
-                            , C.series .x
-                                [ C.interpolated .y [ CA.monotone, CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
-                                [ { x = 5, y = 30822646 }
-                                , { x = 50, y = 3824299 }
-                                , { x = 500, y = 392379 }
-                                ]
-                            , C.series .x
-                                [ C.interpolated .y [ CA.monotone, CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
-                                [ { x = 5, y = 274508871 }
-                                , { x = 50, y = 274508871 }
-                                , { x = 500, y = 274508871 }
-                                ]
-                            , C.dotLabels
-                                [ CA.moveUp 20
-                                , CA.fontSize 16
-                                , CA.format (\item -> CI.getY item |> formatWithCommas)
-                                ]
-                            ]
-                    ]
-        ]
-
-
-toString : Int -> String
-toString n =
-    "n = " ++ String.fromInt n
-
-
-replaceWithArray_code : List Content
-replaceWithArray_code =
-    page
-        { chapter = "改善① List を Array に置き換える"
-        , title = "実装の変更"
-        }
-        [ highlightElm
+        , highlightElm
             (highlightLines (Just Del) 3 4
                 >> highlightLines (Just Add) 4 5
                 >> highlightLines (Just Del) 6 7
@@ -683,20 +582,24 @@ replaceWithArray_benchmark =
         }
         [ Custom.benchmark <|
             Benchmark.describe "startPositions"
-                [ Benchmark.scale "List"
-                    ([ 5 -- 10,777,648 runs/s (GoF: 99.95%)
-                     , 50 -- 2,137,145 runs/s (GoF: 99.93%)
-                     , 500 -- 206,667 runs/s (GoF: 99.84%)
-                     , 5000 -- 21,238 runs/s (GoF: 99.85%)
+                [ Benchmark.scale "List.filterを使う場合"
+                    ([ 10 -- 7,867,463 runs/s (GoF: 99.68%)
+                     , 100 -- 1,202,934 runs/s (GoF: 99.66%)
+                     , 1000 -- 105,125 runs/s (GoF: 99.86%)
+
+                     --  , 2500 -- 42,881 runs/s (GoF: 99.95%)
+                     , 5000 -- 23,018 runs/s (GoF: 99.84%)
                      ]
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.startPositions_list target ))
                     )
-                , Benchmark.scale " Listに変換して List.sortBy"
-                    ([ 5 -- 3,936,471 runs/s (GoF: 99.95%)
-                     , 50 -- 1,500,727 runs/s (GoF: 99.97%)
-                     , 500 -- 230,693 runs/s (GoF: 99.96%)
-                     , 5000 -- 22,697 runs/s (GoF: 99.96%)
+                , Benchmark.scale "Array.filterに変更"
+                    ([ 10 -- 6,391,412 runs/s (GoF: 99.82%)
+                     , 100 -- 1,516,647 runs/s (GoF: 99.88%)
+                     , 1000 -- 182,849 runs/s (GoF: 99.89%)
+
+                     --  , 2500 -- 68,818 runs/s (GoF: 99.96%)
+                     , 5000 -- 33,334 runs/s (GoF: 99.93%)
                      ]
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size |> Array.fromList ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_tmp target ))
@@ -743,18 +646,20 @@ replaceWithArray_benchmark_chart =
                             , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
                             , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
                             , C.series .x
-                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
-                                [ { x = 5, y = 10777648 }
-                                , { x = 50, y = 2137145 }
-                                , { x = 500, y = 206667 }
-                                , { x = 5000, y = 21238 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 7867463 }
+                                , { x = 100, y = 1202934 }
+                                , { x = 1000, y = 105125 }
+                                , { x = 2500, y = 42881 }
+                                , { x = 5000, y = 23018 }
                                 ]
                             , C.series .x
-                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
-                                [ { x = 5, y = 3936471 }
-                                , { x = 50, y = 1500727 }
-                                , { x = 500, y = 230693 }
-                                , { x = 5000, y = 22697 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 6391412 }
+                                , { x = 100, y = 1516647 }
+                                , { x = 1000, y = 182849 }
+                                , { x = 2500, y = 68818 }
+                                , { x = 5000, y = 33334 }
                                 ]
                             ]
                     ]
@@ -791,19 +696,23 @@ replaceWithArray_sortBy_benchmark =
         [ Custom.benchmark <|
             Benchmark.describe "sortBy"
                 [ Benchmark.scale "Listに変換して List.sortBy"
-                    ([ 5 -- 3,936,471 runs/s (GoF: 99.95%)
-                     , 50 -- 1,500,727 runs/s (GoF: 99.97%)
-                     , 500 -- 230,693 runs/s (GoF: 99.96%)
-                     , 5000 -- 22,697 runs/s (GoF: 99.96%)
+                    ([ 10 -- 6,197,778 runs/s (GoF: 99.16%)
+                     , 100 -- 1,261,381 runs/s (GoF: 99.78%)
+                     , 1000 -- 136,169 runs/s (GoF: 99.92%)
+
+                     --  , 2500 -- 53,081 runs/s (GoF: 99.9%)
+                     , 5000 -- 26,229 runs/s (GoF: 99.85%)
                      ]
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size |> Array.fromList ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_tmp target ))
                     )
                 , Benchmark.scale "Array.Extra2.sortBy"
-                    ([ 5 -- 3,936,471 runs/s (GoF: 99.95%)
-                     , 50 -- 1,500,727 runs/s (GoF: 99.97%)
-                     , 500 -- 230,693 runs/s (GoF: 99.96%)
-                     , 5000 -- 22,697 runs/s (GoF: 99.96%)
+                    ([ 10 -- 7,705,030 runs/s (GoF: 99.49%)
+                     , 100 -- 1,212,313 runs/s (GoF: 99.54%)
+                     , 1000 -- 122,188 runs/s (GoF: 99.8%)
+
+                     --  , 2500 -- 47,325 runs/s (GoF: 99.91%)
+                     , 5000 -- 22,301 runs/s (GoF: 99.83%)
                      ]
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size |> Array.fromList ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> startPositions_array target ))
@@ -849,18 +758,20 @@ replaceWithArray_sortBy_benchmark_chart =
                             , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
                             , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
                             , C.series .x
-                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
-                                [ { x = 5, y = 3936471 }
-                                , { x = 50, y = 1500727 }
-                                , { x = 500, y = 230693 }
-                                , { x = 5000, y = 22697 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 6197778 }
+                                , { x = 100, y = 1261381 }
+                                , { x = 1000, y = 136169 }
+                                , { x = 2500, y = 53081 }
+                                , { x = 5000, y = 26229 }
                                 ]
                             , C.series .x
-                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
-                                [ { x = 5, y = 3936471 }
-                                , { x = 50, y = 1500727 }
-                                , { x = 500, y = 230693 }
-                                , { x = 5000, y = 22697 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 7705030 }
+                                , { x = 100, y = 1212313 }
+                                , { x = 1000, y = 122188 }
+                                , { x = 2500, y = 47325 }
+                                , { x = 5000, y = 22301 }
                                 ]
                             ]
                     ]
@@ -924,21 +835,23 @@ replaceWithDict_ordersByLap_benchmark =
         [ Custom.benchmark <|
             Benchmark.describe "ordersByLap"
                 [ Benchmark.scale "AssocList"
-                    ([ 5 -- 1,290,015 runs/s (GoF: 99.97%)
-                     , 50 -- 71,653 runs/s (GoF: 99.98%)
-                     , 500 -- 625 runs/s (GoF: 99.99%)
+                    ([ 10 -- 722,799 runs/s (GoF: 99.39%)
+                     , 100 -- 30,336 runs/s (GoF: 99.79%)
+                     , 1000 -- 305 runs/s (GoF: 99.96%)
 
-                     --  , 5000 -- 46 runs/s (GoF: 99.97%)
+                     --  , 2500 -- 121 runs/s (GoF: 99.94%)
+                     --  , 5000 -- 57 runs/s (GoF: 99.95%)
                      ]
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.ordersByLap_list target ))
                     )
                 , Benchmark.scale "Dict"
-                    ([ 5 -- 945,315 runs/s (GoF: 99.99%)
-                     , 50 -- 64,006 runs/s (GoF: 99.98%)
-                     , 500 -- 5,279 runs/s (GoF: 99.99%)
+                    ([ 10 -- 496,866 runs/s (GoF: 99.93%)
+                     , 100 -- 31,250 runs/s (GoF: 99.86%)
+                     , 1000 -- 3,350 runs/s (GoF: 99.95%)
 
-                     --  , 5000 -- 541 runs/s (GoF: 99.99%)
+                     --  , 2500 -- 1,327 runs/s (GoF: 99.97%)
+                     , 5000 -- 647 runs/s (GoF: 99.99%)
                      ]
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Data.Wec.Preprocess.Dict.ordersByLap_dict target ))
@@ -971,22 +884,26 @@ replaceWithDict_ordersByLap_benchmark_chart =
                             [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
                             , C.yLabels
                                 [ CA.withGrid
-                                , CA.format (\y -> formatWithCommas (exponential y))
                                 , CA.fontSize 24
+                                , CA.format (\y -> formatWithCommas (exponential y))
                                 ]
                             , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
                             , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
                             , C.series .x
-                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
-                                [ { x = 5, y = 1290015 }
-                                , { x = 50, y = 71653 }
-                                , { x = 500, y = 625 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 722799 }
+                                , { x = 100, y = 30336 }
+                                , { x = 1000, y = 305 }
+                                , { x = 2500, y = 121 }
+                                , { x = 5000, y = 57 }
                                 ]
                             , C.series .x
-                                [ C.interpolated (.y >> logarithmic) [ CA.monotone, CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
-                                [ { x = 5, y = 945315 }
-                                , { x = 50, y = 64006 }
-                                , { x = 500, y = 5279 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 496866 }
+                                , { x = 100, y = 31250 }
+                                , { x = 1000, y = 3350 }
+                                , { x = 2500, y = 1327 }
+                                , { x = 5000, y = 647 }
                                 ]
                             , C.dotLabels
                                 [ CA.moveUp 20
@@ -1005,28 +922,56 @@ replaceWithDict_preprocessHelper_benchmark =
         , title = "ベンチマーク：preprocessHelper"
         }
         [ Custom.benchmark <|
-            let
-                options_beginning =
-                    { carNumber = "15"
-                    , laps = Fixture.csvDecodedForCarNumber "15"
-                    , startPositions = Beginning.startPositions_list Fixture.csvDecoded
-                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
-                    }
+            Benchmark.describe "preprocessHelper"
+                [ Benchmark.scale "AssocList"
+                    ([ -- 10 -- 16,080,582 runs/s (GoF: 99.73%)
+                       100 -- 15,827,913 runs/s (GoF: 99.86%)
 
-                options_dict =
-                    { carNumber = "15"
-                    , laps = Fixture.csvDecodedForCarNumber "15"
-                    , startPositions = Data.Wec.Preprocess.Dict.startPositions_list Fixture.csvDecoded
-                    , ordersByLap = Data.Wec.Preprocess.Dict.ordersByLap_dict Fixture.csvDecoded
-                    }
-            in
-            Benchmark.compare "preprocessHelper"
-                "old"
-                -- 349 runs/s (GoF: 99.99%)
-                (\_ -> Beginning.preprocessHelper options_beginning)
-                "improved"
-                -- 2,215 runs/s (GoF: 99.95%)
-                (\_ -> Data.Wec.Preprocess.Dict.preprocessHelper options_dict)
+                     --  , 1000 -- 428 runs/s (GoF: 99.98%)
+                     --  , 2500 -- 428 runs/s (GoF: 99.99%)
+                     , 5000 -- 425 runs/s (GoF: 99.98%)
+                     ]
+                        |> List.map
+                            (\size ->
+                                ( size
+                                , let
+                                    decoded =
+                                        Fixture.csvDecodedOfSize size
+                                  in
+                                  { carNumber = "15"
+                                  , laps = List.filter (\{ carNumber } -> carNumber == "15") decoded
+                                  , startPositions = Beginning.startPositions_list decoded
+                                  , ordersByLap = Beginning.ordersByLap_list decoded
+                                  }
+                                )
+                            )
+                        |> List.map (\( size, options ) -> ( toString size, \_ -> Beginning.preprocessHelper options ))
+                    )
+                , Benchmark.scale "Dict"
+                    ([ -- 10 -- 15,880,402 runs/s (GoF: 99.78%)
+                       100 -- 15,428,292 runs/s (GoF: 99.33%)
+
+                     --  , 1000 -- 423 runs/s (GoF: 99.97%)
+                     --  , 2500 -- 421 runs/s (GoF: 99.96%)
+                     , 5000 -- 420 runs/s (GoF: 99.96%)
+                     ]
+                        |> List.map
+                            (\size ->
+                                ( size
+                                , let
+                                    decoded =
+                                        Fixture.csvDecodedOfSize size
+                                  in
+                                  { carNumber = "15"
+                                  , laps = List.filter (\{ carNumber } -> carNumber == "15") decoded
+                                  , startPositions = Data.Wec.Preprocess.Dict.startPositions_list decoded
+                                  , ordersByLap = Data.Wec.Preprocess.Dict.ordersByLap_dict decoded
+                                  }
+                                )
+                            )
+                        |> List.map (\( size, options ) -> ( toString size, \_ -> Data.Wec.Preprocess.Dict.preprocessHelper options ))
+                    )
+                ]
         ]
 
 
@@ -1051,29 +996,34 @@ replaceWithDict_preprocessHelper_benchmark_chart =
                             , CA.width 800
                             , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
                             ]
-                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
-                            , C.yLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.yLabels
+                                [ CA.withGrid
+                                , CA.fontSize 24
+                                , CA.format (\y -> formatWithCommas (exponential y))
+                                ]
                             , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
-                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "実装" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 80 ] ]
-                                [ { x = 1, y = 349 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 16080582 }
+                                , { x = 100, y = 15827913 }
+                                , { x = 1000, y = 428 }
+                                , { x = 2500, y = 428 }
+                                , { x = 5000, y = 425 }
                                 ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 80 ] ]
-                                [ { x = 1, y = 2215 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 15880402 }
+                                , { x = 100, y = 15428292 }
+                                , { x = 1000, y = 423 }
+                                , { x = 2500, y = 421 }
+                                , { x = 5000, y = 420 }
                                 ]
                             , C.dotLabels
                                 [ CA.moveUp 20
-                                , CA.fontSize 18
-                                , CA.format
-                                    (\item ->
-                                        let
-                                            data =
-                                                CI.getData item
-                                        in
-                                        formatWithCommas data.y
-                                    )
+                                , CA.fontSize 16
+                                , CA.format (\item -> CI.getData item |> .y |> formatWithCommas)
                                 ]
                             ]
                     ]
@@ -1157,20 +1107,54 @@ improve_logic_laps_benchmark =
         , title = "ベンチマーク：laps_"
         }
         [ Custom.benchmark <|
-            let
-                options =
-                    { carNumber = "15"
-                    , laps = Fixture.csvDecodedForCarNumber "15"
-                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
-                    }
-            in
-            Benchmark.compare "laps_"
-                "old"
-                -- 294 runs/s (GoF: 99.99%)
-                (\_ -> Beginning.laps_ options)
-                "improved"
-                -- 2,199 runs/s (GoF: 99.96%)
-                (\_ -> Data.Wec.Preprocess.laps_ options)
+            Benchmark.describe "laps_"
+                [ Benchmark.scale "old"
+                    ([ --  10 -- 45,435,160 runs/s (GoF: 99.39%)
+                       100 -- 45,075,492 runs/s (GoF: 97.85%)
+
+                     --  , 1000 -- 427 runs/s (GoF: 99.95%)
+                     --  , 2500 -- 421 runs/s (GoF: 99.96%)
+                     , 5000 -- 423 runs/s (GoF: 99.96%)
+                     ]
+                        |> List.map
+                            (\size ->
+                                ( size
+                                , let
+                                    decoded =
+                                        Fixture.csvDecodedOfSize size
+                                  in
+                                  { carNumber = "15"
+                                  , laps = List.filter (\{ carNumber } -> carNumber == "15") decoded
+                                  , ordersByLap = Beginning.ordersByLap_list decoded
+                                  }
+                                )
+                            )
+                        |> List.map (\( size, options ) -> ( toString size, \_ -> Beginning.laps_ options ))
+                    )
+                , Benchmark.scale "improved"
+                    ([ -- 10 -- 80,915,084 runs/s (GoF: 99.12%)
+                       100 -- 81,502,573 runs/s (GoF: 99.71%)
+
+                     --  , 1000 -- 3,182 runs/s (GoF: 99.71%)
+                     --  , 2500 -- 3,156 runs/s (GoF: 99.92%)
+                     , 5000 -- 3,133 runs/s (GoF: 99.98%)
+                     ]
+                        |> List.map
+                            (\size ->
+                                ( size
+                                , let
+                                    decoded =
+                                        Fixture.csvDecodedOfSize size
+                                  in
+                                  { carNumber = "15"
+                                  , laps = List.filter (\{ carNumber } -> carNumber == "15") decoded
+                                  , ordersByLap = Beginning.ordersByLap_list decoded
+                                  }
+                                )
+                            )
+                        |> List.map (\( size, options ) -> ( toString size, \_ -> Data.Wec.Preprocess.laps_ options ))
+                    )
+                ]
         ]
 
 
@@ -1195,29 +1179,34 @@ improve_logic_laps_benchmark_chart =
                             , CA.width 800
                             , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
                             ]
-                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
-                            , C.yLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.yLabels
+                                [ CA.withGrid
+                                , CA.fontSize 24
+                                , CA.format (\y -> formatWithCommas (exponential y))
+                                ]
                             , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
-                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "実装" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 80 ] ]
-                                [ { x = 1, y = 294 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 45435160 }
+                                , { x = 100, y = 45075492 }
+                                , { x = 1000, y = 427 }
+                                , { x = 2500, y = 421 }
+                                , { x = 5000, y = 423 }
                                 ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 80 ] ]
-                                [ { x = 1, y = 2199 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 80915084 }
+                                , { x = 100, y = 81502573 }
+                                , { x = 1000, y = 3182 }
+                                , { x = 2500, y = 3156 }
+                                , { x = 5000, y = 3133 }
                                 ]
                             , C.dotLabels
                                 [ CA.moveUp 20
-                                , CA.fontSize 18
-                                , CA.format
-                                    (\item ->
-                                        let
-                                            data =
-                                                CI.getData item
-                                        in
-                                        formatWithCommas data.y
-                                    )
+                                , CA.fontSize 16
+                                , CA.format (\item -> CI.getData item |> .y |> formatWithCommas)
                                 ]
                             ]
                     ]
@@ -1231,21 +1220,56 @@ improve_logic_preprocessHelper_benchmark =
         , title = "ベンチマーク：preprocessHelper"
         }
         [ Custom.benchmark <|
-            let
-                options =
-                    { carNumber = "15"
-                    , laps = Fixture.csvDecodedForCarNumber "15"
-                    , startPositions = Beginning.startPositions_list Fixture.csvDecoded
-                    , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
-                    }
-            in
-            Benchmark.compare "preprocessHelper"
-                "old"
-                -- 349 runs/s (GoF: 99.99%)
-                (\_ -> Beginning.preprocessHelper options)
-                "improved"
-                -- 2,215 runs/s (GoF: 99.95%)
-                (\_ -> Data.Wec.Preprocess.preprocessHelper options)
+            Benchmark.describe "preprocessHelper"
+                [ Benchmark.scale "old"
+                    ([ -- 10 -- 16,690,851 runs/s (GoF: 99.35%)
+                       100 -- 16,993,472 runs/s (GoF: 99.63%)
+
+                     --  , 1000 -- 430 runs/s (GoF: 99.92%)
+                     --  , 2500 -- 428 runs/s (GoF: 99.97%)
+                     , 5000 -- 427 runs/s (GoF: 99.97%)
+                     ]
+                        |> List.map
+                            (\size ->
+                                ( size
+                                , let
+                                    decoded =
+                                        Fixture.csvDecodedOfSize size
+                                  in
+                                  { carNumber = "15"
+                                  , laps = List.filter (\{ carNumber } -> carNumber == "15") decoded
+                                  , startPositions = Beginning.startPositions_list decoded
+                                  , ordersByLap = Beginning.ordersByLap_list decoded
+                                  }
+                                )
+                            )
+                        |> List.map (\( size, options ) -> ( toString size, \_ -> Beginning.preprocessHelper options ))
+                    )
+                , Benchmark.scale "improved"
+                    ([ --  10 -- 18,660,245 runs/s (GoF: 99.66%)
+                       100 -- 18,822,823 runs/s (GoF: 99.73%)
+
+                     --  , 1000 -- 3,132 runs/s (GoF: 99.73%)
+                     --  , 2500 -- 3,096 runs/s (GoF: 99.88%)
+                     , 5000 -- 3,091 runs/s (GoF: 99.96%)
+                     ]
+                        |> List.map
+                            (\size ->
+                                ( size
+                                , let
+                                    decoded =
+                                        Fixture.csvDecodedOfSize size
+                                  in
+                                  { carNumber = "15"
+                                  , laps = List.filter (\{ carNumber } -> carNumber == "15") decoded
+                                  , startPositions = Beginning.startPositions_list decoded
+                                  , ordersByLap = Beginning.ordersByLap_list decoded
+                                  }
+                                )
+                            )
+                        |> List.map (\( size, options ) -> ( toString size, \_ -> Data.Wec.Preprocess.preprocessHelper options ))
+                    )
+                ]
         ]
 
 
@@ -1270,29 +1294,34 @@ improve_logic_preprocessHelper_benchmark_chart =
                             , CA.width 800
                             , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
                             ]
-                            [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
-                            , C.yLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            [ C.xLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.yLabels
+                                [ CA.withGrid
+                                , CA.fontSize 24
+                                , CA.format (\y -> formatWithCommas (exponential y))
+                                ]
                             , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
-                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "実装" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 80 ] ]
-                                [ { x = 1, y = 349 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 16690851 }
+                                , { x = 100, y = 16993472 }
+                                , { x = 1000, y = 430 }
+                                , { x = 2500, y = 428 }
+                                , { x = 5000, y = 427 }
                                 ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 80 ] ]
-                                [ { x = 1, y = 2215 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 18660245 }
+                                , { x = 100, y = 18822823 }
+                                , { x = 1000, y = 3132 }
+                                , { x = 2500, y = 3096 }
+                                , { x = 5000, y = 3091 }
                                 ]
                             , C.dotLabels
                                 [ CA.moveUp 20
-                                , CA.fontSize 18
-                                , CA.format
-                                    (\item ->
-                                        let
-                                            data =
-                                                CI.getData item
-                                        in
-                                        formatWithCommas data.y
-                                    )
+                                , CA.fontSize 16
+                                , CA.format (\item -> CI.getData item |> .y |> formatWithCommas)
                                 ]
                             ]
                     ]
@@ -1308,21 +1337,23 @@ improve_logic_benchmark =
         [ Custom.benchmark <|
             Benchmark.describe "preprocess"
                 [ Benchmark.scale "old"
-                    ([ 10 -- 67,307 runs/s (GoF: 99.99%)
-                     , 100 -- 1,272 runs/s (GoF: 99.99%)
+                    ([ 10 -- 92,293 runs/s (GoF: 99.68%)
+                     , 100 -- 1,665 runs/s (GoF: 99.55%)
 
-                     --  , 1000 -- 62 runs/s (GoF: 99.99%)
-                     --  , 5000 -- 11 runs/s (GoF: 100%)
+                     --  , 1000 -- 70 runs/s (GoF: 99.99%)
+                     --    2500 -- 26 runs/s (GoF: 99.99%)
+                     --  , 5000 -- 13 runs/s (GoF: 99.99%)
                      ]
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.preprocess target ))
                     )
                 , Benchmark.scale "improved"
-                    ([ 10 -- 117,702 runs/s (GoF: 99.99%)
-                     , 100 -- 5,654 runs/s (GoF: 99.98%)
+                    ([ 10 -- 109,789 runs/s (GoF: 99.85%)
+                     , 100 -- 7,305 runs/s (GoF: 99.89%)
 
-                     --  , 1000 -- 167 runs/s (GoF: 99.99%)
-                     --  , 5000 -- 27 runs/s (GoF: 100%)
+                     --   , 1000 -- 196 runs/s (GoF: 100%)
+                     --    2500 -- 69 runs/s (GoF: 99.99%)
+                     --  , 5000 -- 32 runs/s (GoF: 99.98%)
                      ]
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Data.Wec.Preprocess.preprocess target ))
@@ -1335,7 +1366,7 @@ improve_logic_benchmark_chart : List Content
 improve_logic_benchmark_chart =
     page
         { chapter = "改善③ 計算ロジックを改良する"
-        , title = "測定結果：laps_"
+        , title = "測定結果：preprocess"
         }
         [ item <|
             Html.toUnstyled <|
@@ -1353,16 +1384,24 @@ improve_logic_benchmark_chart =
                             , CA.margin { top = 20, right = 20, bottom = 60, left = 80 }
                             ]
                             [ C.xLabels [ CA.withGrid, CA.fontSize 24 ]
-                            , C.yLabels [ CA.withGrid, CA.fontSize 24, CA.format formatWithCommas ]
+                            , C.yLabels [ CA.withGrid, CA.fontSize 24, CA.format (\y -> formatWithCommas (exponential y)) ]
                             , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
-                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "実装" ]
+                            , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データサイズ" ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 80 ] ]
-                                [ { x = 1, y = 294 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 92293 }
+                                , { x = 100, y = 1665 }
+                                , { x = 1000, y = 70 }
+                                , { x = 2500, y = 26 }
+                                , { x = 5000, y = 13 }
                                 ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 80 ] ]
-                                [ { x = 1, y = 2199 }
+                                [ C.interpolated (.y >> logarithmic) [ CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
+                                [ { x = 10, y = 109789 }
+                                , { x = 100, y = 7305 }
+                                , { x = 1000, y = 196 }
+                                , { x = 2500, y = 69 }
+                                , { x = 5000, y = 32 }
                                 ]
                             , C.dotLabels
                                 [ CA.moveUp 20
