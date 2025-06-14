@@ -105,6 +105,7 @@ slides =
         ""
         [ conclusion
         , t_shirts
+        , supplement
         ]
     ]
         |> List.concat
@@ -1685,4 +1686,26 @@ t_shirts =
                         ]
                     ]
                     []
+        ]
+
+
+supplement : List Content
+supplement =
+    page
+        { chapter = "おまけ"
+        , title = "ポイントフリースタイル"
+        }
+        [ highlightElm identity
+            """-- ポイントフリースタイルあり
+{ carNumber = 15 } |> (.carNumber >> (==) 15))
+
+-- ポイントフリースタイルなし
+{ carNumber = 15 } |> ({ carNumber } -> carNumber == 15)
+            """
+        , Custom.benchmark <|
+            Benchmark.compare "carNumber comparison"
+                "あり"
+                (\_ -> { carNumber = 15 } |> (.carNumber >> (==) 15))
+                "なし"
+                (\_ -> { carNumber = 15 } |> (\{ carNumber } -> carNumber == 15))
         ]
