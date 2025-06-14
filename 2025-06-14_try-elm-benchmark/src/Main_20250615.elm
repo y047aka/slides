@@ -16,8 +16,8 @@ import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
 import Formatting.Styled as Formatting exposing (Tag(..), background, colored, highlightElm, markdownPage, nextButton, page, prevButton, spacer, tagCloud)
-import Html.Styled as Html exposing (br, div, h1, img, span, text)
-import Html.Styled.Attributes exposing (css, src)
+import Html.Styled as Html exposing (a, br, div, h1, img, span, text)
+import Html.Styled.Attributes as Attributes exposing (css, href, src)
 import Json.Decode as JD
 import MyBenchmark as Benchmark
 import SliceShow exposing (Message, Model, init, item, setDimensions, setSubscriptions, setUpdate, setView, show)
@@ -101,7 +101,9 @@ slides =
         [ cli ]
     , chapter "まとめ"
         ""
-        [ conclusion ]
+        [ conclusion
+        , t_shirts
+        ]
     ]
         |> List.concat
         |> List.map addMobileNavigationButtons
@@ -144,7 +146,16 @@ cover =
                 ]
                 []
             , span [ css [ fontSize (rem 3) ] ]
-                [ text "Yoshitaka Totsuka" ]
+                [ text "戸塚孝高（"
+                , a
+                    [ href "https://bsky.app/profile/yoshitaka.bsky.social"
+                    , Attributes.target "_blank"
+                    , Attributes.rel "noopener noreferrer"
+                    , css [ textDecoration none ]
+                    ]
+                    [ text "@yoshitaka.bsky.social" ]
+                , text "）"
+                ]
             ]
         , spacer 15
         , div
@@ -1596,4 +1607,30 @@ conclusion =
 - 計算部分がボトルネックになることは少ないかも
 - シンプル、明快な実装を維持することも重要
 """
+        ]
+
+
+t_shirts : List Content
+t_shirts =
+    page
+        { chapter = "まとめ"
+        , title = "関数型まつりTシャツ販売中です"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ Css.height (pct 100)
+                        , borderRadius (px 10)
+                        , Css.property "background-image"
+                            ("url('"
+                                ++ "assets/images/2025-06-14_try-elm-benchmark/"
+                                ++ "T-shirts.png"
+                                ++ "')"
+                            )
+                        , backgroundSize Css.cover
+                        , backgroundRepeat noRepeat
+                        ]
+                    ]
+                    []
         ]
