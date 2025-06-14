@@ -163,7 +163,7 @@ cover =
 
 chapter : String -> String -> List (List Content) -> List (List Content)
 chapter titleText bgImagePath contents =
-    [ background ("assets/images/2025-06-15_try-elm-benchmark/" ++ bgImagePath)
+    [ background ("assets/images/2025-06-14_try-elm-benchmark/" ++ bgImagePath)
         [ div
             [ css
                 [ height (pct 100)
@@ -289,7 +289,7 @@ elmMotorsportAnalysis_image =
                         , borderRadius (px 10)
                         , Css.property "background-image"
                             ("url('"
-                                ++ "assets/images/2025-06-15_try-elm-benchmark/"
+                                ++ "assets/images/2025-06-14_try-elm-benchmark/"
                                 ++ "elm_motorsport_analysis.png"
                                 ++ "')"
                             )
