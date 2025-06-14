@@ -41,6 +41,7 @@ slides =
 
       -- はじめに
       , introduction
+      , flow
       , elmTagCloud
       , elmMotorsportAnalysis
       , elmMotorsportAnalysis_image
@@ -189,10 +190,29 @@ introduction : List Content
 introduction =
     page
         { chapter = "はじめに"
+        , title = "自己紹介"
+        }
+        [ markdownPage """
+- 業務で5年間Elmを使っている
+- 関数型まつりスタッフ
+    - Webサイトのデザイン・実装（elm-pagesを使ったSSGとして実装）
+    - 会場装飾、スタッフTシャツなどのデザイン
+    - 一般販売用のTシャツも販売しています
+        - [https://www.ttrinity.jp/shop/fp-matsuri/](https://www.ttrinity.jp/shop/fp-matsuri/)
+- モータースポーツ観戦が好きです🏎️
+"""
+        ]
+
+
+flow : List Content
+flow =
+    page
+        { chapter = "はじめに"
         , title = "発表の流れ"
         }
         [ markdownPage """
 - Elmってどんな言語？
+- 今回の題材紹介
 - ベンチマーク測定方法の説明
 - 最適化の試み
     - List を Array に置き換える
@@ -405,19 +425,20 @@ oldWorkflow_benchmark =
                         |> List.map (\size -> ( size, Fixture.csvDecodedOfSize size ))
                         |> List.map (\( size, target ) -> ( toString size, \_ -> Beginning.preprocess target ))
                     )
-                , let
-                    options =
-                        { carNumber = "15"
-                        , laps = Fixture.csvDecodedForCarNumber "15"
-                        , startPositions = Beginning.startPositions_list Fixture.csvDecoded
-                        , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
-                        }
-                  in
-                  Benchmark.benchmark "preprocessHelper"
-                    (\_ ->
-                        -- 375 runs/s (GoF: 100%)
-                        Beginning.preprocessHelper options
-                    )
+
+                -- , let
+                --     options =
+                --         { carNumber = "15"
+                --         , laps = Fixture.csvDecodedForCarNumber "15"
+                --         , startPositions = Beginning.startPositions_list Fixture.csvDecoded
+                --         , ordersByLap = Beginning.ordersByLap_list Fixture.csvDecoded
+                --         }
+                --   in
+                --   Benchmark.benchmark "preprocessHelper"
+                --     (\_ ->
+                --         -- 375 runs/s (GoF: 100%)
+                --         Beginning.preprocessHelper options
+                --     )
                 ]
         ]
 
