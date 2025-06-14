@@ -15,7 +15,7 @@ import Data.Wec.Decoder as Wec
 import Data.Wec.Preprocess
 import Data.Wec.Preprocess.Beginning as Beginning
 import Data.Wec.Preprocess.Dict
-import Formatting.Styled as Formatting exposing (Tag(..), background, colored, highlightElm, markdown, markdownPage, nextButton, page, prevButton, spacer, tagCloud)
+import Formatting.Styled as Formatting exposing (Tag(..), background, colored, highlightElm, markdownPage, nextButton, page, prevButton, spacer, tagCloud)
 import Html.Styled as Html exposing (br, div, h1, img, span, text)
 import Html.Styled.Attributes exposing (css, src)
 import Json.Decode as JD
@@ -99,10 +99,9 @@ slides =
     , chapter "改善⑤ その他の選択肢"
         "P1002574.jpeg"
         [ cli ]
-    , chapter "ベンチマークから得られた知見"
+    , chapter "まとめ"
         ""
-        [ lessonsLearned ]
-    , [ conclusion ]
+        [ conclusion ]
     ]
         |> List.concat
         |> List.map addMobileNavigationButtons
@@ -371,7 +370,7 @@ oldWorkflow =
         }
         [ markdownPage """
 1. CSVデータの読み込み＆デコード
-    - ル・マン24時間レース（2024年）の走行データ
+    - FIA WEC 富士6時間レース（2024年）の走行データ
     - 周回データとしてデコード
 3. データの前処理（`preprocess`）
     - 車両単位での再構成
@@ -386,16 +385,16 @@ oldWorkflow_code =
         { chapter = "ベンチマーク測定してみよう！"
         , title = "CSVをパースし、周回データとしてデコード"
         }
-        [ markdownPage """
-- 周回データを解析し、車両単位で再構成
-"""
-        , highlightElm identity """preprocess : List Lap -> List Car
+        [ highlightElm identity """{-| 周回データを解析し、車両単位で再構成
+-}
+preprocess : List Lap -> List Car
 preprocess laps =
     laps
-        |> AssocList.Extra.groupBy .carNumber
+        |> AssocList.Extra.groupBy .carNumber -- 車両単位で再構成
         |> AssocList.toList
         |> List.map
             (\\( carNumber, laps_ ) ->
+                -- 周回データを解析（順位変動、最速ラップタイムなど）
                 preprocessHelper_old
                     { carNumber = carNumber
                     , laps = ...
@@ -1076,15 +1075,18 @@ improve_logic_code_old : List Content
 improve_logic_code_old =
     page
         { chapter = "改善③ 計算ロジックを改良する"
-        , title = "実装の変更"
+        , title = "改修前"
         }
-        [ highlightElm identity """laps_old : { carNumber : String, laps : List Wec.Lap } -> List Lap
+        [ highlightElm identity """{-| 周回データを解析し、順位変動、最速ラップタイムの情報を追加する
+-}
+laps_old : { carNumber : String, laps : List Wec.Lap } -> List Lap
 laps_old { carNumber, laps } =
     laps
         |> List.indexedMap
             (\\index { lapTime } ->
                 { ...
                 , best =
+                    -- 1週ごとに最速タイムを計算し直していた
                     laps
                         |> List.take (index + 1)
                         |> List.map .lapTime
@@ -1101,10 +1103,12 @@ improve_logic_code =
         { chapter = "改善③ 計算ロジックを改良する"
         , title = "実装の変更"
         }
-        [ highlightElm identity """laps_improved : { carNumber : String, laps : List WecLap } -> List Lap
+        [ highlightElm identity """{-| 周回データを解析し、順位変動、最速ラップタイムの情報を追加する
+-}
+laps_improved : { carNumber : String, laps : List WecLap } -> List Lap
 laps_improved { carNumber, laps } =
     let
-        step : Wec.Lap -> Acc -> Acc
+        step : WecLap -> Acc -> Acc
         step { lapTime } acc =
             let
                 bestLapTime =
@@ -1526,11 +1530,11 @@ replaceWithJson_benchmark_chart =
                             , C.labelAt .min CA.middle [ CA.fontSize 20, CA.moveLeft 100, CA.rotate 90 ] [ Svg.text "実行回数/秒" ]
                             , C.labelAt CA.middle .min [ CA.fontSize 20, CA.moveDown 80 ] [ Svg.text "データ形式" ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 100 ] ]
+                                [ C.interpolated .y [ CA.color "#d32f2f" ] [ CA.circle, CA.size 40 ] ]
                                 [ { x = 1, y = 307 }
                                 ]
                             , C.series .x
-                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 100 ] ]
+                                [ C.interpolated .y [ CA.color "#388e3c" ] [ CA.circle, CA.size 40 ] ]
                                 [ { x = 1, y = 799 }
                                 ]
                             , C.dotLabels
@@ -1566,69 +1570,30 @@ cli =
 
 ## Html.Lazy や Html.Keyed の活用
 
-- もしボトルネックがViewの再描画にある場合は、これらの関数を活用することで改善できる
-"""
-        ]
-
-
-lessonsLearned : List Content
-lessonsLearned =
-    page
-        { chapter = "ベンチマークから得られた知見"
-        , title = "データ構造・パフォーマンス・実務応用"
-        }
-        [ markdownPage """
-## パフォーマンス最適化の原則
-
-- **測定してから最適化**: 推測より実測が重要
-- **段階的改善**: 小さな変更を積み重ねて効果を確認
-- **適切なデータ構造の選択**: List、Array、Dictの使い分け
-
-## 実装から得た教訓
-
-- **実測の価値**: ベンチマークで予想外の結果を発見
-- **シンプルさの力**: 理解しやすい実装の重要性
-- **プラットフォーム理解**: ElmとJavaScript VMの特性把握
-
-## The Elm Architectureでの最適化
-
-- Html.Lazy, Html.Keyed の活用
-- モデル設計の見直し
-- データ構造の選択
-
-## 自作実装の価値
-
-- **教育効果**: 内部動作の深い理解
-- **カスタマイズ性**: 特定用途への最適化
-- **学習機会**: 関数型プログラミングの実践
+- もしボトルネックがViewの再描画（仮想DOMの更新）にある場合は、これらの関数を活用することで改善できる
 """
         ]
 
 
 conclusion : List Content
 conclusion =
-    [ background "assets/images/cover_20231202.jpg"
-        (markdown """
-# まとめ
+    page
+        { chapter = "まとめ"
+        , title = "わかったこと"
+        }
+        [ markdownPage """
+## 確実なベンチマーク測定が最重要
 
-## 主な成果
+- 実装と測定結果の相関関係を確実にする
 
-- **Array専用ソート**: List型を使わない完全なArray実装を実現
-- **複数アルゴリズム検証**: ヒープソート、マージソート、クイックソートを比較
-- **実測による発見**: 理論と実践の違いを体験
+## 興味本位でパフォーマンス改善を試みるのはちょっと大変
 
-## 効果的な最適化アプローチ
+- ボトルネックを見つけて、そこを狙い打ちする必要がある
+- 改修しやすい順で進める場合、思うような効果が出ないこともある
 
-- 段階的な改善: List → Array → Dict → ロジック改善
-- 測定主導の開発: ベンチマークで効果を確認
-- シンプルさの価値: 可読性とパフォーマンスのバランス
+## 本当にパフォーマンスで困るまでは最適化しすぎない
 
-## 今後の展望
-
-- より大規模データでの検証
-- WebWorkersやWebAssemblyとの比較
-- 実用アプリケーションでの活用
-
-[サンプルコードとベンチマーク結果](https://github.com/y047aka/elm-benchmark-example)
-""")
-    ]
+- 計算部分がボトルネックになることは少ないかも
+- シンプル、明快な実装を維持することも重要
+"""
+        ]
