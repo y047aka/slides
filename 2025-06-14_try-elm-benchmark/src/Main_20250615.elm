@@ -43,6 +43,8 @@ slides =
       , introduction
       , flow
       , elmTagCloud
+      , whatDayIsToday
+      , leMans24h
       , elmMotorsportAnalysis
       , elmMotorsportAnalysis_image
       , motivation
@@ -203,6 +205,8 @@ introduction =
         , title = "自己紹介"
         }
         [ markdownPage """
+## 戸塚孝高（とつか よしたか）
+
 - 業務で5年間Elmを使っている
 - 関数型まつりスタッフ
     - Webサイトのデザイン・実装（elm-pagesを使ったSSGとして実装）
@@ -253,8 +257,8 @@ elmTagCloud =
             , Gray 1.8 "型推論"
 
             -- Elm固有の項目
-            , Gray 2.5 "フロントエンド開発に特化"
-            , Gray 2.6 "JavaScriptにコンパイルされる"
+            , Gray 3.2 "JavaScriptにコンパイルされる"
+            , Gray 2.8 "フロントエンド開発に特化"
             , Green 3.2 "The Elm Architecture"
             , Green 3.0 "実行時エラーが起きにくい"
             , Green 2.4 "言語仕様がシンプルで学びやすい"
@@ -264,6 +268,54 @@ elmTagCloud =
             , Green 2.2 "エラーメッセージが親切"
             , Red 2.2 "ボイラープレートの記述が多い"
             ]
+        ]
+
+
+whatDayIsToday : List Content
+whatDayIsToday =
+    page
+        { chapter = "はじめに"
+        , title = "今日は何の日？"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ Css.height (pct 100)
+                        , property "display" "grid"
+                        , property "place-items" "center"
+                        ]
+                    ]
+                    [ div [ css [ fontSize (em 4), fontWeight bold ] ]
+                        [ text "今日は何の日？" ]
+                    ]
+        ]
+
+
+leMans24h : List Content
+leMans24h =
+    page
+        { chapter = "はじめに"
+        , title = "今日はル・マン24時間レース決勝です！"
+        }
+        [ item <|
+            Html.toUnstyled <|
+                div
+                    [ css
+                        [ Css.height (pct 100)
+                        , borderRadius (px 10)
+                        , Css.property "background-image"
+                            ("url('"
+                                ++ "assets/images/2025-06-14_try-elm-benchmark/"
+                                ++ "24h_le_mans.webp"
+                                ++ "')"
+                            )
+                        , backgroundSize Css.cover
+                        , backgroundRepeat noRepeat
+                        , Css.property "background-position" "center"
+                        ]
+                    ]
+                    []
         ]
 
 
@@ -1590,7 +1642,7 @@ conclusion : List Content
 conclusion =
     page
         { chapter = "まとめ"
-        , title = "わかったこと"
+        , title = "ベンチマーク測定に挑戦してみた感想"
         }
         [ markdownPage """
 ## 確実なベンチマーク測定が最重要
@@ -1614,7 +1666,7 @@ t_shirts : List Content
 t_shirts =
     page
         { chapter = "まとめ"
-        , title = "関数型まつりTシャツ販売中です"
+        , title = "関数型まつりTシャツ販売中です！"
         }
         [ item <|
             Html.toUnstyled <|
