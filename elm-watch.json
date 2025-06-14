@@ -23,6 +23,12 @@
                 "2019-08-09_example/src/Main_20190809.elm"
             ],
             "output": "public/build/2019-08-09_example.js"
+        },
+        "2025-06-15_try-elm-benchmark": {
+            "inputs": [
+                "2025-06-15_try-elm-benchmark/src/Main_20250615.elm"
+            ],
+            "output": "public/build/2025-06-15_try-elm-benchmark.js"
         }
     }
 }

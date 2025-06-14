@@ -11,8 +11,8 @@
     "elm": "^0.19.1-5",
     "elm-format": "^0.8.5",
     "elm-watch": "^1.1.0",
-    "esbuild": "0.15.12",
-    "run-pty": "4.0.2",
-    "uglify-js": "3.17.4"
+    "esbuild": "0.25.2",
+    "run-pty": "5.0.0",
+    "uglify-js": "3.19.3"
   }
 }
